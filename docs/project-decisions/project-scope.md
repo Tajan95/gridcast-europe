@@ -9,7 +9,7 @@
 
 Für Land $c$, Zielstunde $t$ und Day-ahead-Horizont gilt:
 
-$
+$$
 \widehat L_{c,t}
 =
 f\!\left(
@@ -20,7 +20,7 @@ L_{c,t-48},
 L_{c,t-168},
 \text{rollende Historie}_{c,<t}
 \right)
-$
+$$
 
 Die Formulierung `t` statt `t+24` macht deutlich: Die Features beschreiben die Zielstunde, historische Lastmerkmale enden jedoch mindestens 24 Stunden davor.
 
