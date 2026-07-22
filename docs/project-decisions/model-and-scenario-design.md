@@ -11,13 +11,13 @@
 
 ### Baseline-Modelle
 
-\[
+$
 \widehat L^{(24)}_{c,t}=L_{c,t-24}
-\]
+$
 
-\[
+$
 \widehat L^{(168)}_{c,t}=L_{c,t-168}
-\]
+$
 
 Das finale ML-Modell wird auf denselben Teststunden gegen beide Regeln verglichen.
 
@@ -35,33 +35,33 @@ Bei einem Backtesttag stammt die Temperatur aus der Reanalyse und war historisch
 
 Zuerst wird die Temperatur innerhalb der Wetterfeatures geändert und das ML-Modell erneut ausgeführt:
 
-\[
+$
 \widehat L^{\text{temp}}_{c,t}
 =
 f_{ML}(X_{c,t}\;\text{mit}\;T_{c,t}+\Delta T)
-\]
+$
 
 Danach werden transparente externe Annahmen angewendet:
 
-\[
+$
 \widehat L^{\text{scenario}}_{c,t}
 =
 \widehat L^{\text{temp}}_{c,t}\,(1+g)
 +
 \Delta L_{DC,c,t}
-\]
+$
 
 mit:
 
-- \(\Delta T\): Temperaturänderung gegenüber dem Referenzprofil,
-- \(g\): relative strukturelle Nachfrageänderung gegenüber dem Basisszenario,
-- \(\Delta L_{DC,c,t}\): externer Rechenzentrumslastaufschlag in MW.
+- $\Delta T$: Temperaturänderung gegenüber dem Referenzprofil,
+- $g$: relative strukturelle Nachfrageänderung gegenüber dem Basisszenario,
+- $\Delta L_{DC,c,t}$: externer Rechenzentrumslastaufschlag in MW.
 
-Falls ein jährlicher Wachstumssatz \(r\) und ein Szenariojahr \(y\) verwendet werden, wird \(g\) explizit berechnet:
+Falls ein jährlicher Wachstumssatz $r$ und ein Szenariojahr $y$ verwendet werden, wird $g$ explizit berechnet:
 
-\[
+$
 g(y)=(1+r)^{y-y_0}-1
-\]
+$
 
 Ein einfacher Prozentregler ist für den Pflichtumfang leichter zu verteidigen. Ein Jahresregler darf erst ergänzt werden, wenn Referenzjahr und Wachstumspfad durch eine konkrete Quelle belegt sind.
 
@@ -74,21 +74,21 @@ Ein einfacher Prozentregler ist für den Pflichtumfang leichter zu verteidigen. 
 
 Für die zusätzliche Spitzenlast:
 
-\[
+$
 \Delta L_{peak}
 =
 \max_t \widehat L^{\text{scenario}}_{c,t}
 -
 \max_t \widehat L^{\text{base}}_{c,t}
-\]
+$
 
-\[
+$
 \Delta L_{peak,\%}
 =
 100\cdot
 \frac{\Delta L_{peak}}
 {\max_t \widehat L^{\text{base}}_{c,t}}
-\]
+$
 
 ## Interpretation
 
