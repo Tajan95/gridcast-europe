@@ -13,31 +13,31 @@ Sie ist ausdrücklich **keine Blackout-, Netzausfall- oder Netzüberlastungswahr
 
 ## Historische Schwelle
 
-Für Land \(c\) wird aus den Trainingsdaten eine Schwelle gebildet:
+Für Land $c$ wird aus den Trainingsdaten eine Schwelle gebildet:
 
-\[
+$
 q_{c,\alpha}
 =
 Q_{\alpha}\!\left(L_{c,t}:t\in\text{Training}\right)
-\]
+$
 
-Als App-Auswahl sind \(\alpha=0{,}95\) und optional \(0{,}99\) vorgesehen. Die finale Auswertung muss Land, Quantil und Referenzperiode anzeigen.
+Als App-Auswahl sind $\alpha=0{,}95$ und optional $0{,}99$ vorgesehen. Die finale Auswertung muss Land, Quantil und Referenzperiode anzeigen.
 
 ## Empirische Fehlerverteilung
 
 Auf dem Validierungszeitraum entstehen out-of-sample Residuen:
 
-\[
+$
 e_i=L_i-\widehat L_i
-\]
+$
 
 Der Testzeitraum bleibt dabei unangetastet. Für den MVP werden länderspezifisch gepoolte Validierungsresiduen verwendet; bei genügend Daten kann später nach Prognosestunde oder Jahreszeit kalibriert werden.
 
 ## Stündliche Wahrscheinlichkeit
 
-Für eine Szenarioprognose \(\widehat L^{scenario}_{c,t}\) wird empirisch geschätzt:
+Für eine Szenarioprognose $\widehat L^{scenario}_{c,t}$ wird empirisch geschätzt:
 
-\[
+$
 \widehat P_{c,t}
 =
 \frac{1}{B}
@@ -45,15 +45,15 @@ Für eine Szenarioprognose \(\widehat L^{scenario}_{c,t}\) wird empirisch gesch�
 \mathbf{1}\!\left[
 \widehat L^{scenario}_{c,t}+e_i>q_{c,\alpha}
 \right]
-\]
+$
 
 Das Ergebnis ist der Anteil historischer Validierungsfehler, unter denen die prognostizierte Last die Schwelle überschreiten würde.
 
 ## Tageswahrscheinlichkeit
 
-Stundenfehler sind zeitlich abhängig. Für die Wahrscheinlichkeit, dass an mindestens einer der 24 Stunden ein Extremzustand auftritt, werden deshalb vollständige 24-Stunden-Residualblöcke \(\mathbf e_b\) statt unabhängig gezogener Einzelresiduen verwendet:
+Stundenfehler sind zeitlich abhängig. Für die Wahrscheinlichkeit, dass an mindestens einer der 24 Stunden ein Extremzustand auftritt, werden deshalb vollständige 24-Stunden-Residualblöcke $\mathbf e_b$ statt unabhängig gezogener Einzelresiduen verwendet:
 
-\[
+$
 \widehat P_{day}
 =
 \frac{1}{B}
@@ -63,7 +63,7 @@ Stundenfehler sind zeitlich abhängig. Für die Wahrscheinlichkeit, dass an mind
 (\widehat L^{scenario}_{c,h}+e_{b,h})
 >q_{c,\alpha}
 \right]
-\]
+$
 
 Die erste Codefassung liegt in [`src/gridcast/risk.py`](../../src/gridcast/risk.py). Sie berechnet Quantilschwelle, stündliche empirische Wahrscheinlichkeiten und die Tageswahrscheinlichkeit aus Residualpfaden.
 
