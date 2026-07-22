@@ -21,6 +21,25 @@ $$
 
 Das finale ML-Modell wird auf denselben Teststunden gegen beide Regeln verglichen.
 
+#### Bedeutung von 24 und 168 Stunden
+
+Für eine beispielhafte Zielstunde **Mittwoch, 15:00 Uhr** bedeutet:
+
+- $L_{c,t-24}$: gemessene Last am Dienstag um 15:00 Uhr,
+- $L_{c,t-168}$: gemessene Last am vorherigen Mittwoch um 15:00 Uhr.
+
+Die 24-Stunden-Baseline übernimmt also schlicht den Wert derselben Stunde des Vortags; die 168-Stunden-Baseline den Wert derselben Stunde der Vorwoche. Dieselben verzögerten Werte können zusätzlich als Eingaben des ML-Modells dienen. Dort werden sie jedoch mit Wetter- und Kalendermerkmalen kombiniert.
+
+### Prognose, Test-Split und echte Datenlücken
+
+Diese drei Fälle sind methodisch zu trennen:
+
+1. **Chronologischer Test-Split:** Die Messwerte des Testjahres sind vorhanden, werden dem Training aber vorenthalten. Das Modell prognostiziert sie; anschließend werden Prognose und tatsächlich gemessene Last verglichen. Der Test-Split ist keine Datenlücke.
+2. **Echte Messlücke:** Fehlen einzelne Last- oder Wetterwerte bereits im Rohdatensatz, muss die betroffene Zeile dokumentiert verworfen oder mit einem gesonderten, ausschließlich vergangenheitsbasierten Verfahren imputiert werden. Das ist Datenbereinigung, nicht das primäre Prognoseziel.
+3. **Day-ahead-Prognose:** Das trainierte Modell schätzt eine noch unbekannte Zielstunde 24 Stunden im Voraus aus den zu diesem Zeitpunkt verfügbaren historischen Lastwerten sowie bekannten Kalender- und angenommenen Wetterdaten.
+
+Eine Prognose für weit entfernte Jahre entsteht nicht durch rekursives Wiederholen der 24-Stunden-Prognose. Die langfristige Ebene bleibt eine ausgewiesene Szenarioanalyse auf Basis eines Referenzprofils und expliziter externer Annahmen.
+
 ### Basisszenario der App
 
 Das Basisszenario ist die unveränderte ML-Prognose für den gewählten historischen Backtest- oder Referenztag:
