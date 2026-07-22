@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# GridCast Europe: local data and model artifacts
+data/raw/*
+data/external/*
+data/processed/*
+models/*
+!data/README.md
+!models/README.md
