@@ -1,15 +1,28 @@
 # Project Scope und Forschungsfragen
 
-**Stand:** 22.07.2026  
+**Stand:** 23.07.2026  
 **Status:** beschlossen
 
 ## Hauptfrage
 
 > Wie genau lässt sich die Stromlast ausgewählter europäischer Länder 24 Stunden im Voraus anhand historischer Last-, Wetter- und Kalenderdaten prognostizieren?
 
+### Warum 24 Stunden?
+
+Der Prognosehorizont von 24 Stunden ist eine **bewusste Scope-Entscheidung**, keine vom Datensatz vorgegebene Naturkonstante. Er bildet eine Day-ahead-Prognose ab: Für alle 24 Stunden des nächsten Tages wird eine Lastkurve erstellt.
+
+Dieser Horizont ist für das Projekt sinnvoll, weil:
+
+- Kalendermerkmale der Zielstunden bereits bekannt sind,
+- ein Wetterprofil für den Folgetag grundsätzlich als Vorhersage verfügbar sein kann,
+- Lastmessungen bis einschließlich 24 Stunden vor jeder Zielstunde sicher als Eingaben vorliegen,
+- das Ergebnis als zusammenhängende Tageskurve gut evaluierbar und in Streamlit darstellbar ist.
+
+Auch ein Horizont von einer Stunde, sieben Tagen oder einem Monat wäre grundsätzlich möglich. Dann müssten jedoch Features, Datenverfügbarkeit, Evaluation und App-Logik entsprechend neu entworfen werden. Insbesondere wären bei längeren Horizonten die Last-Lags nahe der Zielzeit noch nicht bekannt.
+
 Für Land $c$, Zielstunde $t$ und Day-ahead-Horizont gilt:
 
-$$
+```math
 \widehat L_{c,t}
 =
 f\!\left(
@@ -20,9 +33,11 @@ L_{c,t-48},
 L_{c,t-168},
 \text{rollende Historie}_{c,<t}
 \right)
-$$
+```
 
 Die Formulierung `t` statt `t+24` macht deutlich: Die Features beschreiben die Zielstunde, historische Lastmerkmale enden jedoch mindestens 24 Stunden davor.
+
+`lag_24h`, `lag_48h` und `lag_168h` sind dabei **historische Messwerte als Features**. Sie sind nicht selbst „die 24-Stunden-Vorhersage“. Die gleich benannten naiven Baselines verwenden jeweils nur einen solchen Messwert als vollständige Vergleichsprognose.
 
 ## Erweiterte Streamlit-Frage
 
@@ -78,6 +93,15 @@ Sie beantwortet nicht:
 
 > Wie wird Europas gesamtes Energiesystem im Jahr 2050 mit Sicherheit aussehen?
 
+## Datumswahl in der App
+
+Die App unterscheidet zwei Modi:
+
+1. **Historischer Backtest:** Auswahl eines Datums aus dem Testzeitraum. Das Modell verwendet nur Informationen, die 24 Stunden vorher verfügbar gewesen wären. Anschließend werden Prognose und tatsächlich gemessene Last verglichen.
+2. **Szenarioanalyse:** Auswahl eines dokumentierten historischen Referenztages oder eines extern vorgegebenen Wetter-/Klimaprofils. Temperatur, Nachfrage und Rechenzentrumslast werden transparent verändert.
+
+Ein beliebiges fernes Zukunftsdatum kann nicht allein aus seiner Kalenderangabe seriös vorhergesagt werden. Dafür fehlen insbesondere das konkrete Wetterprofil und die unmittelbar vorausgehenden realen Lastmessungen. Die App darf deshalb keine scheinpräzise Prognose für beispielsweise den 17. August 2042 erzeugen, wenn diese Eingangsdaten nicht durch ein externes Szenario bereitgestellt werden.
+
 ## Außerhalb des Scopes
 
 - sektorale Zerlegung der nationalen Stromlast
@@ -106,4 +130,3 @@ Das Projekt ist prüfungsbereit, wenn:
 5. das finale Modell auf dem unangetasteten Testzeitraum mindestens eine naive Baseline schlägt,
 6. Fehler nach Land und Tageszeit erklärt werden,
 7. die Streamlit-App Ergebnisse und Grenzen korrekt kommuniziert.
-
