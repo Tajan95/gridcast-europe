@@ -46,6 +46,7 @@ Die zweite Ebene ist eine *Was-wäre-wenn*-Analyse. Sie wird nicht als autonome,
 - [Wahrscheinlichkeit eines extremen Lastzustands](docs/project-decisions/extreme-load-state.md)
 - [Katalog der Datenquellen-Kandidaten](docs/data-sources/README.md)
 - [QUA³CK-Arbeitsstruktur](documents/QUA3CK/README.md)
+- [Dokumentation der KI-Nutzung](documents/ki-nutzungs.md)
 
 ## Repository-Struktur
 
@@ -67,4 +68,3 @@ Große Daten- und Modelldateien werden nicht in Git versioniert. Download und Au
 ## Status
 
 Aktueller Stand: **Scope festgelegt; Datenquellen verifiziert; reproduzierbarer Datenimport und Vollständigkeitsprüfung als nächster Schritt.**
-
