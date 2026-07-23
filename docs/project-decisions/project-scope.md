@@ -20,7 +20,7 @@ Dieser Horizont ist für das Projekt sinnvoll, weil:
 
 Auch ein Horizont von einer Stunde, sieben Tagen oder einem Monat wäre grundsätzlich möglich. Dann müssten jedoch Features, Datenverfügbarkeit, Evaluation und App-Logik entsprechend neu entworfen werden. Insbesondere wären bei längeren Horizonten die Last-Lags nahe der Zielzeit noch nicht bekannt.
 
-Für eine Zielstunde `t` lässt sich die derzeit vorgesehene Modelllogik renderer-robust so zusammenfassen:
+Für eine Zielstunde `t` lässt sich die derzeit vorgesehene Modelllogik kompakt so zusammenfassen:
 
 > **Prognostizierte Last = Modell(Kalendermerkmale, Wettermerkmale, historische Lastmerkmale)**
 
