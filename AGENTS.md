@@ -14,35 +14,40 @@ Prüfungstermin: **28.07.2026**.
 
 Primärfrage:
 
-> Wie genau lässt sich die Stromlast ausgewählter europäischer Länder 24 Stunden im Voraus anhand historischer Last-, Wetter- und Kalenderdaten prognostizieren?
+> Wie genau lässt sich die stündliche Stromlast ausgewählter europäischer Länder anhand historischer Last-, Wetter- und Kalenderdaten für einen chronologisch späteren, vollständig zurückgehaltenen Zeitraum prognostizieren?
 
 Erweiterung:
 
-> Wie verändert sich das prognostizierte Lastprofil unter unterschiedlichen Temperatur-, Nachfrage- und Rechenzentrumsszenarien?
+> Wie verändert sich ein aus historischen Mustern abgeleitetes Lastprofil für einen frei wählbaren Zukunftszeitpunkt unter klimatologischen und strukturellen Szenarioannahmen?
 
 ## Scope-Leitplanken
 
-- Kernmodell: Day-ahead-Lastprognose für voraussichtlich drei europäische Länder.
-- Features: Kalenderzyklen, Werktag/Wochenende, Saison, Temperatur, Last-Lags 24/48/168 Stunden, vergangenheitsbasierte rollende Statistiken und kurzfristige Laständerungen.
+- Kernmodell: überwachte Regression der stündlichen Last für voraussichtlich drei europäische Länder.
+- Features: Land, Kalenderzyklen, Werktag/Wochenende, Saison, Temperatur und weitere ausreichend vollständige Wettermerkmale.
+- Last-Lags 24/48/168 Stunden sind nicht Bestandteil des Kernmodells und keine App-Eingaben.
+- Der historische Backtest und die langfristige Szenarioanalyse sind methodisch und sprachlich zu trennen.
+- Das Zukunftsszenario verwendet ein automatisch abgeleitetes statistisch typisches Wetterprofil.
 - Szenarien sind konditionale Was-wäre-wenn-Rechnungen, keine behaupteten kausalen Langfristprognosen.
+- Langfristiges Nachfragewachstum wird als transparente externe Annahme modelliert, nicht als sichere ML-Extrapolation.
 - Rechenzentren werden nur als transparenter externer Lastaufschlag oder offizieller Szenariopfad berücksichtigt.
 - Keine Aufteilung nach Wirtschaftssektoren im Pflichtumfang.
-- Kein eigenes Stromnetzausbaumodell.
+- Kein eigenes Stromnetzausbau- oder Wettervorhersagemodell.
 - Keine Blackout- oder Netzausfallwahrscheinlichkeit behaupten.
 - Zulässig ist nur die klar benannte „Wahrscheinlichkeit eines extremen Lastzustands“ relativ zu einer historischen Quantilschwelle.
 
 ## Methodische Leitplanken
 
 - Chronologischer Split; kein zufälliger 70/30-Split für eine Zeitprognose.
-- Testjahr unangetastet lassen, bis Modell und Hyperparameter feststehen.
-- Baseline-Modelle `load(t-24)` und `load(t-168)` immer berichten.
-- Tatsächliches Reanalysewetter im Backtest ausdrücklich von einer realen Wettervorhersage unterscheiden.
-- Keine Features verwenden, die zum Prognosezeitpunkt unbekannt wären.
-- Rollende Features müssen strikt vor dem Zielzeitpunkt enden.
+- Testzeitraum unangetastet lassen, bis Modell und Hyperparameter feststehen.
+- Baseline-Modelle als länderspezifischen Mittelwert und Kalenderdurchschnitt immer berichten.
+- Alle Baselines und klimatologischen Profile leakage-frei aus den dafür vorgesehenen historischen Daten berechnen.
+- Tatsächliches Reanalysewetter im Backtest ausdrücklich vom statistisch typischen Wetterprofil der Szenarioanalyse unterscheiden.
+- Ein historischer Zeittrend darf explorativ analysiert, aber nicht unkritisch bis 2030 oder 2050 extrapoliert werden.
 - UTC, lokale Zeit und Sommerzeit dokumentiert behandeln.
 - Länder erst nach gemessener Vollständigkeit und Joinbarkeit auswählen.
 - Modellgüte mit MAE, RMSE, normalisiertem MAE und Baseline-Verbesserung bewerten; R² nur ergänzend.
 - „Baseline-Modell“ und „Basisszenario“ sprachlich strikt trennen.
+- Eine dargestellte 24-Stunden-Tageskurve nicht mit einem 24-Stunden-Prognosehorizont verwechseln.
 
 ## Repository-Konventionen
 
@@ -54,4 +59,3 @@ Erweiterung:
 - Wiederverwendbaren Code unter `src/gridcast/` ablegen; Notebooks orchestrieren, statt Logik zu duplizieren.
 - Keine großen Daten, Modelle oder Secrets committen.
 - Jede Wahrscheinlichkeitsaussage muss ihre Schwelle, Referenzperiode und Kalibrierungsdaten nennen.
-
