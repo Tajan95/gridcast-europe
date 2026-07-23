@@ -6,38 +6,41 @@ Dieses Repository entsteht für das IU-Modul **Data Analytics und Big Data** und
 
 ## Forschungsfrage
 
-> Wie genau lässt sich die Stromlast ausgewählter europäischer Länder 24 Stunden im Voraus anhand historischer Last-, Wetter- und Kalenderdaten prognostizieren?
+> Wie genau lässt sich die stündliche Stromlast ausgewählter europäischer Länder anhand historischer Last-, Wetter- und Kalenderdaten für einen chronologisch späteren, vollständig zurückgehaltenen Zeitraum prognostizieren?
 
 Erweiterte Streamlit-Frage:
 
-> Wie verändert sich das prognostizierte Lastprofil unter unterschiedlichen Temperatur-, Nachfrage- und Rechenzentrumsszenarien?
+> Wie verändert sich ein aus historischen Mustern abgeleitetes Lastprofil für einen frei wählbaren Zukunftszeitpunkt unter klimatologischen und strukturellen Szenarioannahmen?
 
 ## Methodischer Kern
 
 - stündliche Beobachtungseinheit `Land × UTC-Stunde`
 - drei europäische Länder nach dokumentierter Vollständigkeitsprüfung
-- chronologischer Split, vorläufig: Training 2015–2017, Validierung 2018, Test 2019
-- Baseline-Modelle: Last vor 24 Stunden und Last vor 168 Stunden
+- chronologischer Train-/Validierungs-/Test-Split; genaue Jahre nach Datenprüfung
+- Baseline-Modelle: länderspezifischer Mittelwert und Kalenderdurchschnitt
 - Vergleichsmodelle: lineare/regularisierte Regression und Gradient Boosting
+- Kernfeatures: Land, Kalenderzyklen und ausreichend vollständige Wettermerkmale
 - Metriken: MAE, RMSE, normalisierter MAE, ergänzend sMAPE und R²
-- primäre Mindestanforderung: finales Modell schlägt auf dem unangetasteten Testzeitraum mindestens eine naive Baseline
+- Ziel: messbarer Mehrwert gegenüber der Kalender-Baseline auf dem unangetasteten Testzeitraum
 
 ## Berücksichtigte Faktoren
 
 - Tages- und Wochenzyklen
 - Werktage, Wochenenden und optional Feiertage
 - Monate und Jahreszeiten
-- tatsächliche bzw. im Backtest bekannte Temperatur
-- Last vor 24, 48 und 168 Stunden
-- vergangenheitsbasierte rollende Mittelwerte, Streuungen und Laständerungen
-- optional direkte und diffuse Sonneneinstrahlung
+- Temperatur und nichtlineare Temperaturwirkungen
+- optional direkte und diffuse Sonneneinstrahlung oder Bewölkung
+- historischer Zeittrend nur explorativ
+- langfristige Nachfrage- und Rechenzentrumsentwicklung als transparente Szenarioannahmen
 
 ## Zwei Ebenen
 
-1. **Day-ahead-ML-Prognose:** Vorhersage der nächsten 24 Stunden aus zu diesem Zeitpunkt verfügbaren Merkmalen.
-2. **Konditionale Szenarioanalyse:** erneute Prognose mit veränderter Temperatur und transparenten externen Nachfrage-/Rechenzentrumsannahmen.
+1. **Historischer Backtest:** Prognose eines chronologisch späteren, vollständig zurückgehaltenen Zeitraums und Vergleich mit den tatsächlichen Lastwerten.
+2. **Konditionale Zukunftsszenarioanalyse:** frei wählbares Zukunftsdatum mit automatisch erzeugtem typischem Wetterprofil sowie Temperatur-, Nachfrage- und Rechenzentrumsszenarien.
 
-Die zweite Ebene ist eine *Was-wäre-wenn*-Analyse. Sie wird nicht als autonome, kausale Lastprognose bis 2030 oder 2050 ausgegeben.
+Die zweite Ebene ist eine *Was-wäre-wenn*-Analyse. Sie wird nicht als konkrete Wettervorhersage oder autonome, kausale Lastprognose bis 2030 oder 2050 ausgegeben.
+
+Eine angezeigte 24-Stunden-Kurve beschreibt den ausgewählten Kalendertag. Sie ist kein festgelegter operativer Prognosehorizont.
 
 ## Zentrale Dokumente
 
@@ -58,7 +61,7 @@ documents/QUA3CK/           Prüfungsdokumentation entlang der fünf Phasen
 models/                     gespeicherte Modellartefakte und Metadaten
 notebooks/                  Analyse- und Modellierungsnotebooks
 reports/                    Abbildungen und Präsentationsartefakte
-src/gridcast/                wiederverwendbarer Python-Code
+src/gridcast/               wiederverwendbarer Python-Code
 streamlit_app/              interaktive Anwendung
 tests/                      automatisierte Tests
 ```
