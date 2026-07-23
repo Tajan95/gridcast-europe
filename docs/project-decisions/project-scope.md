@@ -20,22 +20,11 @@ Dieser Horizont ist für das Projekt sinnvoll, weil:
 
 Auch ein Horizont von einer Stunde, sieben Tagen oder einem Monat wäre grundsätzlich möglich. Dann müssten jedoch Features, Datenverfügbarkeit, Evaluation und App-Logik entsprechend neu entworfen werden. Insbesondere wären bei längeren Horizonten die Last-Lags nahe der Zielzeit noch nicht bekannt.
 
-Für Land $c$, Zielstunde $t$ und Day-ahead-Horizont gilt:
+Für eine Zielstunde `t` lässt sich die derzeit vorgesehene Modelllogik renderer-robust so zusammenfassen:
 
-```math
-\widehat L_{c,t}
-=
-f\!\left(
-\text{Kalender}_{c,t},
-\text{Wetter}_{c,t},
-L_{c,t-24},
-L_{c,t-48},
-L_{c,t-168},
-\text{rollende Historie}_{c,<t}
-\right)
-```
+> **Prognostizierte Last = Modell(Kalendermerkmale, Wettermerkmale, historische Lastmerkmale)**
 
-Die Formulierung `t` statt `t+24` macht deutlich: Die Features beschreiben die Zielstunde, historische Lastmerkmale enden jedoch mindestens 24 Stunden davor.
+Die Kalender- und Wettermerkmale beschreiben die Zielstunde `t`. Bei einer Day-ahead-Prognose enden historische Lastmerkmale mindestens 24 Stunden vor dieser Zielstunde.
 
 `lag_24h`, `lag_48h` und `lag_168h` sind dabei **historische Messwerte als Features**. Sie sind nicht selbst „die 24-Stunden-Vorhersage“. Die gleich benannten naiven Baselines verwenden jeweils nur einen solchen Messwert als vollständige Vergleichsprognose.
 
