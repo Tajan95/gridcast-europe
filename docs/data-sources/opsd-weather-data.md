@@ -1,6 +1,6 @@
 # Kandidatenkarte: Open Power System Data – Weather Data
 
-**Status:** A – priorisierte Kernquelle  
+**Status:** A – verifizierte Kernquelle  
 **Rolle:** Wetterfeatures
 
 ## Anbieter und Zugriff
@@ -48,14 +48,15 @@
 - Backtest: sehr hoch, mit klarer Reanalyse-Kennzeichnung
 - echte operative Prognose: nur als Näherung; dafür wäre ein historisches Wettervorhersage-Archiv nötig
 
-## Nächster Verifikationstest
+## Abgeschlossene Verifikation
 
-1. `weather_data.csv` reproduzierbar herunterladen.
-2. Zeitbereich, Ländercodes, Einheiten und Missingness messen.
-3. Inner Join mit allen brauchbaren OPSD-Lastländern durchführen.
-4. dokumentieren, wie viele Länder-Stunden nach Join und Lags verbleiben.
+1. `weather_data.csv` selektiv und reproduzierbar eingelesen.
+2. UTC-Zeitachse 1980–2019 ist sortiert, duplikatfrei und stündlich lückenlos.
+3. Temperatur sowie direkte und diffuse Strahlung sind für DE, FR und PL im Modellfenster vollständig.
+4. Der 1:1-Join mit den nationalen Lastreihen 2015–2019 ist bestätigt.
+5. Für Szenarien wird ein Medianprofil je Land × lokaler Monat × lokale Stunde gebildet.
 
-## Vorläufiges Urteil
+## Urteil
 
-**Geeignet und verbindlich priorisiert.** Die Reanalyse-Einschränkung muss im Referat ausdrücklich genannt werden.
+**Geeignet und als Kernquelle bestätigt.** Die Reanalyse-Einschränkung wird im Notebook, in der QUA³CK-Datenphase und später im Referat ausdrücklich genannt.
 
