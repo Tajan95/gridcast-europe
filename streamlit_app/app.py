@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import sys
 
+import altair as alt
 import joblib
 import numpy as np
 import pandas as pd
@@ -35,6 +36,67 @@ K_REPORT_PATH = PROJECT_ROOT / "reports" / "k_deployment.json"
 COUNTRY_LABELS = {
     code: f"{spec.name} ({code})" for code, spec in COUNTRY_REGISTRY.items()
 }
+COUNTRY_SHORT_LABELS = {
+    code: f"{code} · {spec.name}" for code, spec in COUNTRY_REGISTRY.items()
+}
+COUNTRY_NUMERIC_IDS = {"DE": "276", "FR": "250", "PL": "616"}
+EUROPE_TOPOJSON_URL = (
+    "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
+)
+
+NAVIGATION = [
+    "🏠 Überblick",
+    "🧪 Historischer Backtest",
+    "🔭 Zukunftsszenario",
+    "📐 Methodik",
+]
+
+SCENARIO_PRESETS = {
+    "Historische Referenz": {
+        "icon": "◉",
+        "temperature_delta": 0.0,
+        "demand_change": 0,
+        "data_centre_mw": 0,
+        "description": "Typisches historisches Wetter, ohne Strukturaufschlag.",
+    },
+    "Kalter Wintertag": {
+        "icon": "❄",
+        "temperature_delta": -4.0,
+        "demand_change": 0,
+        "data_centre_mw": 0,
+        "description": "Deutlich kälter als das typische Monatsprofil.",
+    },
+    "Elektrifizierung": {
+        "icon": "↗",
+        "temperature_delta": 0.0,
+        "demand_change": 15,
+        "data_centre_mw": 0,
+        "description": "Illustrativer struktureller Nachfrageanstieg um 15 %.",
+    },
+    "Rechenzentrumsboom": {
+        "icon": "▦",
+        "temperature_delta": 0.0,
+        "demand_change": 0,
+        "data_centre_mw": 2_000,
+        "description": "Zusätzliche konstante Rechenzentrumslast von 2.000 MW.",
+    },
+    "Kombinierter Stresstest": {
+        "icon": "⚠",
+        "temperature_delta": -3.0,
+        "demand_change": 15,
+        "data_centre_mw": 2_000,
+        "description": "Kälte, Elektrifizierung und Rechenzentren gemeinsam.",
+    },
+}
+
+SERIES_COLORS = {
+    "Tatsächliche Last": "#102A43",
+    "HGB-Prognose": "#078C8C",
+    "Kalender-Baseline": "#D97706",
+    "Referenzprofil": "#486581",
+    "Nur Temperaturänderung": "#4C78A8",
+    "Gesamtszenario": "#D1495B",
+}
 
 
 st.set_page_config(
@@ -43,6 +105,179 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+
+def apply_visual_theme() -> None:
+    """Ergänzt die Streamlit-Basisgestaltung um eine ruhige Dashboard-Hierarchie."""
+
+    st.markdown(
+        """
+        <style>
+        :root {
+            --gc-ink: #102A43;
+            --gc-muted: #52667A;
+            --gc-teal: #078C8C;
+            --gc-blue: #1B4F72;
+            --gc-line: #D8E2EA;
+            --gc-paper: rgba(255, 255, 255, 0.92);
+        }
+
+        [data-testid="stAppViewContainer"] {
+            background:
+                radial-gradient(circle at 92% 2%, rgba(7, 140, 140, 0.10), transparent 24rem),
+                linear-gradient(180deg, #F7FAFC 0%, #EEF4F7 100%);
+        }
+
+        [data-testid="stMainBlockContainer"] {
+            max-width: 1320px;
+            padding-top: 2rem;
+            padding-bottom: 4rem;
+        }
+
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #102A43 0%, #173F5F 100%);
+            border-right: 0;
+        }
+
+        [data-testid="stSidebar"] * {
+            color: #F7FAFC;
+        }
+
+        [data-testid="stSidebar"] [role="radiogroup"] label {
+            border-radius: 0.7rem;
+            padding: 0.35rem 0.55rem;
+        }
+
+        [data-testid="stSidebar"] [role="radiogroup"] label:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-testid="stMetric"] {
+            background: var(--gc-paper);
+            border: 1px solid var(--gc-line);
+            border-radius: 0.9rem;
+            box-shadow: 0 8px 24px rgba(16, 42, 67, 0.06);
+            padding: 1rem 1.05rem;
+        }
+
+        [data-testid="stMetricLabel"] {
+            color: var(--gc-muted);
+        }
+
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            background: var(--gc-paper);
+            border-color: var(--gc-line);
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(16, 42, 67, 0.05);
+        }
+
+        div[data-testid="stAlert"] {
+            border-radius: 0.85rem;
+        }
+
+        .gc-hero {
+            position: relative;
+            overflow: hidden;
+            padding: 2.2rem 2.35rem 2rem;
+            margin-bottom: 1.35rem;
+            border-radius: 1.25rem;
+            color: white;
+            background:
+                linear-gradient(120deg, rgba(16, 42, 67, 0.98), rgba(7, 140, 140, 0.93));
+            box-shadow: 0 18px 42px rgba(16, 42, 67, 0.16);
+        }
+
+        .gc-hero::after {
+            content: "";
+            position: absolute;
+            width: 18rem;
+            height: 18rem;
+            right: -5rem;
+            top: -8rem;
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            border-radius: 50%;
+            box-shadow:
+                0 0 0 3rem rgba(255, 255, 255, 0.035),
+                0 0 0 6rem rgba(255, 255, 255, 0.025);
+        }
+
+        .gc-eyebrow {
+            position: relative;
+            z-index: 1;
+            display: inline-block;
+            margin-bottom: 0.7rem;
+            color: #BEE8E7;
+            font-size: 0.78rem;
+            font-weight: 750;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .gc-hero h1 {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            color: white;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            letter-spacing: -0.04em;
+        }
+
+        .gc-hero p {
+            position: relative;
+            z-index: 1;
+            max-width: 53rem;
+            margin: 0.75rem 0 0;
+            color: #EAF7F7;
+            font-size: 1.08rem;
+            line-height: 1.65;
+        }
+
+        .gc-section-kicker {
+            margin-bottom: 0.2rem;
+            color: var(--gc-teal);
+            font-size: 0.76rem;
+            font-weight: 750;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+        }
+
+        .gc-country-code {
+            display: inline-flex;
+            width: 2.4rem;
+            height: 2.4rem;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.65rem;
+            border-radius: 0.7rem;
+            color: white;
+            background: var(--gc-teal);
+            font-weight: 800;
+        }
+
+        .gc-note {
+            color: var(--gc-muted);
+            font-size: 0.87rem;
+            line-height: 1.55;
+        }
+
+        h1, h2, h3 {
+            color: var(--gc-ink);
+            letter-spacing: -0.02em;
+        }
+
+        hr {
+            border-color: var(--gc-line);
+        }
+
+        @media (max-width: 850px) {
+            .gc-hero {
+                padding: 1.6rem 1.4rem;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 @st.cache_resource
@@ -79,100 +314,506 @@ def load_k_report() -> dict:
     return json.loads(K_REPORT_PATH.read_text(encoding="utf-8"))
 
 
+@st.cache_data
+def build_country_overview() -> pd.DataFrame:
+    """Verdichtet die unangetasteten 2019-Daten für Karte und Tooltips."""
+
+    data = load_backtest()
+    data = data.assign(
+        absolute_error_mw=(
+            data["actual_load_mw"] - data["hgb_prediction_mw"]
+        ).abs()
+    )
+    result = (
+        data.groupby("country", as_index=False)
+        .agg(
+            teststunden=("actual_load_mw", "size"),
+            mittlere_last_mw=("actual_load_mw", "mean"),
+            spitzenlast_mw=("actual_load_mw", "max"),
+            mae_mw=("absolute_error_mw", "mean"),
+        )
+        .assign(
+            nmae_pct=lambda frame: (
+                100 * frame["mae_mw"] / frame["mittlere_last_mw"]
+            ),
+            numeric_id=lambda frame: frame["country"].map(COUNTRY_NUMERIC_IDS),
+            land=lambda frame: frame["country"].map(
+                {code: spec.name for code, spec in COUNTRY_REGISTRY.items()}
+            ),
+        )
+    )
+    return result
+
+
 def format_mw(value: float) -> str:
     return f"{value:,.0f} MW".replace(",", ".")
+
+
+def format_mwh(value: float) -> str:
+    return f"{value:,.0f} MWh".replace(",", ".")
 
 
 def format_pct(value: float, digits: int = 1) -> str:
     return f"{value:.{digits}f} %".replace(".", ",")
 
 
+def format_hour(value: int | float) -> str:
+    return f"{int(value):02d}:00 Uhr"
+
+
+def render_page_header(kicker: str, title: str, subtitle: str) -> None:
+    st.markdown(
+        f"""
+        <div class="gc-section-kicker">{kicker}</div>
+        <h1 style="margin:0 0 .35rem 0;">{title}</h1>
+        <p style="margin:0 0 1.25rem;color:#52667A;font-size:1.03rem;">
+            {subtitle}
+        </p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_sidebar() -> str:
+    st.sidebar.markdown(
+        """
+        <div style="padding:.65rem .2rem 1rem;">
+            <div style="font-size:.74rem;letter-spacing:.13em;
+                        text-transform:uppercase;color:#A9D9D8;">
+                GridCast Europe
+            </div>
+            <div style="font-size:1.55rem;font-weight:780;margin-top:.2rem;">
+                Stromlast im Kontext
+            </div>
+            <div style="font-size:.82rem;color:#C9D9E5;margin-top:.35rem;">
+                Historischer Test · Konditionale Szenarien
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    page = st.sidebar.radio(
+        "Ansicht",
+        NAVIGATION,
+        key="page",
+        label_visibility="collapsed",
+    )
+    st.sidebar.markdown("---")
+    st.sidebar.markdown(
+        """
+        <div style="font-size:.78rem;color:#C9D9E5;line-height:1.55;">
+            <b>Modellfenster</b><br>
+            2015–2019 · DE / FR / PL<br><br>
+            <b>Prüfungsprojekt</b><br>
+            IU · Data Analytics und Big Data
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.sidebar.caption("Tajan Biazevic · 2026")
+    return page
+
+
+def navigate_to(page: str, country: str, country_key: str) -> None:
+    st.session_state[country_key] = country
+    st.session_state["page"] = page
+
+
+def build_europe_map(country_data: pd.DataFrame) -> alt.Chart:
+    world = alt.topo_feature(EUROPE_TOPOJSON_URL, "countries")
+    lookup = alt.LookupData(
+        country_data,
+        "numeric_id",
+        [
+            "country",
+            "land",
+            "nmae_pct",
+            "mittlere_last_mw",
+            "spitzenlast_mw",
+            "teststunden",
+        ],
+    )
+    selection = alt.selection_point(
+        name="country_pick",
+        fields=["country"],
+        on="click",
+        clear=False,
+    )
+
+    map_chart = (
+        alt.Chart(world)
+        .mark_geoshape(stroke="#FFFFFF", strokeWidth=0.75)
+        .transform_lookup(lookup="id", from_=lookup)
+        .encode(
+            color=alt.condition(
+                "isValid(datum.country)",
+                alt.Color(
+                    "nmae_pct:Q",
+                    title="Test-nMAE 2019 (%)",
+                    scale=alt.Scale(
+                        domain=[2.4, 3.0],
+                        range=["#69C2BF", "#075985"],
+                    ),
+                    legend=alt.Legend(
+                        orient="bottom",
+                        direction="horizontal",
+                        gradientLength=180,
+                    ),
+                ),
+                alt.value("#E2EAF0"),
+            ),
+            opacity=alt.condition(
+                selection,
+                alt.value(1),
+                alt.value(0.82),
+            ),
+            tooltip=[
+                alt.Tooltip("land:N", title="Land"),
+                alt.Tooltip("country:N", title="Code"),
+                alt.Tooltip(
+                    "nmae_pct:Q",
+                    title="Test-nMAE",
+                    format=".2f",
+                ),
+                alt.Tooltip(
+                    "mittlere_last_mw:Q",
+                    title="Mittlere Last (MW)",
+                    format=",.0f",
+                ),
+                alt.Tooltip(
+                    "spitzenlast_mw:Q",
+                    title="Spitzenlast (MW)",
+                    format=",.0f",
+                ),
+                alt.Tooltip(
+                    "teststunden:Q",
+                    title="Teststunden 2019",
+                    format=",.0f",
+                ),
+            ],
+        )
+        .add_params(selection)
+    )
+    return (
+        map_chart
+        .project(
+            type="mercator",
+            center=[10, 52],
+            scale=520,
+        )
+        .properties(height=430)
+        .configure_view(stroke=None)
+    )
+
+
+def extract_map_country(event) -> str | None:
+    """Liest eine optionale Altair-Auswahl defensiv aus."""
+
+    selection = getattr(event, "selection", None)
+    if selection is None and isinstance(event, dict):
+        selection = event.get("selection")
+    if not selection:
+        return None
+    values = selection.get("country_pick", [])
+    if not values:
+        return None
+    first = values[0] if isinstance(values, list) else values
+    if isinstance(first, dict):
+        country = first.get("country")
+        if country in COUNTRY_REGISTRY:
+            return country
+    return None
+
+
 def render_overview() -> None:
-    report = load_k_report()
-    st.title("⚡ GridCast Europe")
-    st.subheader("Stündliche Stromlast verstehen, prüfen und als Szenario erkunden")
     st.markdown(
         """
-        GridCast verbindet einen **ehrlichen historischen Backtest** mit einer
-        davon getrennten **konditionalen Zukunftsszenarioanalyse** für
-        Deutschland, Frankreich und Polen.
-        """
+        <div class="gc-hero">
+            <div class="gc-eyebrow">QUA³CK · Knowledge Transfer</div>
+            <h1>GridCast Europe</h1>
+            <p>
+                Stündliche Stromlast für Deutschland, Frankreich und Polen –
+                mit unabhängigem Backtest, konditionalen Zukunftsszenarien
+                und transparenten Grenzen.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Test-Makro-nMAE 2019", "2,71 %")
-    col2.metric("Besser als Kalender-Baseline", "44,5 %")
-    col3.metric("Nutzbare Länder-Stunden", "131.441")
-    col4.metric("Kernländer", "3")
+    col1.metric("Test-Makro-nMAE 2019", "2,71 %", help="Länderweise gleichgewichtet.")
+    col2.metric("Fehlerreduktion vs. Kalender", "44,5 %")
+    col3.metric("Teststunden 2019", "26.275")
+    col4.metric("Freigegebene Länder", "3")
 
-    st.markdown("### Was die App kann")
-    left, right = st.columns(2)
-    with left:
-        st.markdown(
-            """
-            **Historischer Backtest**
+    st.markdown("## Europas Lastprofile im Modell")
+    st.caption(
+        "DE, FR und PL sind nach vollständiger Qualitätsprüfung freigegeben. "
+        "Farbe = Modellfehler im unangetasteten Testjahr 2019."
+    )
 
-            - Modell wurde nur auf 2015–2018 gefittet
-            - 2019 blieb bis zur C-Phase vollständig zurückgehalten
-            - Vergleich mit Istwert und Kalender-Baseline
-            - Fehlerkennzahlen für einen wählbaren Tag
-            """
+    if "overview_country" not in st.session_state:
+        st.session_state["overview_country"] = "DE"
+
+    map_col, detail_col = st.columns([1.65, 0.85], gap="large")
+    country_data = build_country_overview()
+    with map_col:
+        map_event = st.altair_chart(
+            build_europe_map(country_data),
+            use_container_width=True,
+            on_select="rerun",
+            selection_mode=["country_pick"],
+            key="europe_country_map",
         )
-    with right:
-        st.markdown(
-            """
-            **Zukunftsszenario**
-
-            - typisches Wetterprofil aus 1980–2019
-            - frei wählbare Temperaturabweichung
-            - transparente Nachfrage- und Rechenzentrumsannahmen
-            - kein behaupteter Wetterbericht oder Blackout-Risiko
-            """
+        picked_country = extract_map_country(map_event)
+        if (
+            picked_country is not None
+            and picked_country != st.session_state["overview_country"]
+        ):
+            st.session_state["overview_country"] = picked_country
+            st.rerun()
+        st.caption(
+            "Interaktiv: Land anklicken oder mit der Maus berühren, um "
+            "Testgüte, Lastniveau und Datenumfang zu sehen."
         )
+
+    with detail_col:
+        with st.container(border=True):
+            focus = st.radio(
+                "Fokusland",
+                options=list(COUNTRY_REGISTRY),
+                format_func=lambda code: COUNTRY_SHORT_LABELS[code],
+                key="overview_country",
+                horizontal=True,
+            )
+            row = country_data.loc[country_data["country"].eq(focus)].iloc[0]
+            st.markdown(
+                f"""
+                <div style="margin:.35rem 0 .9rem;">
+                    <span class="gc-country-code">{focus}</span>
+                    <b style="font-size:1.12rem;">{row["land"]}</b>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            metric_left, metric_right = st.columns(2)
+            metric_left.metric("Test-nMAE", format_pct(row["nmae_pct"], 2))
+            metric_right.metric(
+                "Mittlere Last",
+                format_mw(row["mittlere_last_mw"]),
+            )
+            st.markdown(
+                f"""
+                <div class="gc-note" style="margin:.8rem 0 1rem;">
+                    <b>{int(row["teststunden"]):,}</b> Teststunden ·
+                    beobachtete Spitze <b>{format_mw(row["spitzenlast_mw"])}</b>
+                </div>
+                """.replace(",", "."),
+                unsafe_allow_html=True,
+            )
+            backtest_button, scenario_button = st.columns(2)
+            backtest_button.button(
+                "Backtest öffnen",
+                width="stretch",
+                on_click=navigate_to,
+                args=("🧪 Historischer Backtest", focus, "backtest_country"),
+            )
+            scenario_button.button(
+                "Szenario öffnen",
+                width="stretch",
+                type="primary",
+                on_click=navigate_to,
+                args=("🔭 Zukunftsszenario", focus, "scenario_country"),
+            )
+
+    st.markdown("## Zwei strikt getrennte Analysewege")
+    backtest_col, scenario_col = st.columns(2, gap="large")
+    with backtest_col:
+        with st.container(border=True):
+            st.markdown("### 🧪 Historischer Backtest")
+            st.markdown(
+                """
+                **Die belastbare Qualitätsaussage.** Das Modell wurde für
+                diesen Vergleich nur auf 2015–2018 gefittet. 2019 blieb bis
+                zur C-Phase vollständig zurückgehalten.
+                """
+            )
+            st.caption("Istwert · HGB-Prognose · Kalender-Baseline")
+    with scenario_col:
+        with st.container(border=True):
+            st.markdown("### 🔭 Konditionales Zukunftsszenario")
+            st.markdown(
+                """
+                **Die transparente Was-wäre-wenn-Rechnung.** Historische
+                Wetterprofile werden mit expliziten Temperatur-, Nachfrage-
+                und Rechenzentrumsannahmen kombiniert.
+                """
+            )
+            st.caption("Szenarien sind Stressannahmen, keine Zukunftsprognosen.")
 
     st.info(
-        "Das finale App-Modell wurde nach der unabhängigen Testauswertung auf "
-        "allen Daten von 2015–2019 refittet. Seine belastbare Güteaussage "
-        "stammt weiterhin aus dem vorherigen C-Backtest."
+        "Das App-Modell wurde nach der unabhängigen Auswertung auf 2015–2019 "
+        "refittet. Die belastbare Güteaussage von 2,71 % stammt weiterhin aus "
+        "dem vorherigen C-Backtest."
     )
-    with st.expander("Technischer Deployment-Status"):
-        st.json(
-            {
-                "Modellartefakt": report["model"]["path"],
-                "SHA-256": report["model"]["sha256"],
-                "Smoke-Tests": report["verification"]["passed"],
-                "App-Daten": report["app_assets"],
-            },
-            expanded=False,
+
+
+def build_backtest_chart(day: pd.DataFrame) -> alt.Chart:
+    chart_data = (
+        day[
+            [
+                "utc_timestamp",
+                "actual_load_mw",
+                "hgb_prediction_mw",
+                "calendar_prediction_mw",
+            ]
+        ]
+        .rename(
+            columns={
+                "actual_load_mw": "Tatsächliche Last",
+                "hgb_prediction_mw": "HGB-Prognose",
+                "calendar_prediction_mw": "Kalender-Baseline",
+            }
         )
+        .melt(
+            id_vars="utc_timestamp",
+            var_name="Reihe",
+            value_name="Last_MW",
+        )
+    )
+    order = [
+        "Tatsächliche Last",
+        "HGB-Prognose",
+        "Kalender-Baseline",
+    ]
+    nearest = alt.selection_point(
+        name="hover",
+        nearest=True,
+        on="pointerover",
+        fields=["utc_timestamp"],
+        empty=False,
+    )
+    base = alt.Chart(chart_data).encode(
+        x=alt.X(
+            "utc_timestamp:T",
+            title="UTC-Zeit",
+            axis=alt.Axis(format="%H:%M", labelAngle=0),
+        ),
+        y=alt.Y(
+            "Last_MW:Q",
+            title="Last (MW)",
+            scale=alt.Scale(zero=False),
+        ),
+        color=alt.Color(
+            "Reihe:N",
+            title=None,
+            scale=alt.Scale(
+                domain=order,
+                range=[SERIES_COLORS[name] for name in order],
+            ),
+            sort=order,
+            legend=alt.Legend(orient="top", direction="horizontal"),
+        ),
+        strokeDash=alt.StrokeDash(
+            "Reihe:N",
+            title=None,
+            scale=alt.Scale(
+                domain=order,
+                range=[[1, 0], [1, 0], [8, 5]],
+            ),
+            sort=order,
+            legend=None,
+        ),
+    )
+    lines = base.mark_line(strokeWidth=2.7).encode(
+        tooltip=[
+            alt.Tooltip(
+                "utc_timestamp:T",
+                title="Zeit",
+                format="%d.%m.%Y %H:%M",
+            ),
+            alt.Tooltip("Reihe:N", title="Reihe"),
+            alt.Tooltip("Last_MW:Q", title="Last (MW)", format=",.0f"),
+        ]
+    )
+    selectors = (
+        alt.Chart(chart_data)
+        .mark_point(opacity=0)
+        .encode(x="utc_timestamp:T")
+        .add_params(nearest)
+    )
+    points = base.mark_point(filled=True, size=75).encode(
+        opacity=alt.condition(
+            nearest,
+            alt.value(1),
+            alt.value(0),
+        )
+    )
+    rule = (
+        alt.Chart(chart_data)
+        .mark_rule(color="#91A4B7")
+        .encode(
+            x="utc_timestamp:T",
+            opacity=alt.condition(
+                nearest,
+                alt.value(0.55),
+                alt.value(0),
+            ),
+        )
+        .transform_filter(nearest)
+    )
+    return (
+        (lines + selectors + points + rule)
+        .properties(height=440)
+        .configure_view(stroke=None)
+        .configure_axis(gridColor="#E5ECF1", domainColor="#B8C7D2")
+    )
 
 
 def render_backtest() -> None:
-    st.title("Historischer Backtest 2019")
-    st.caption(
+    render_page_header(
+        "C · Conclude & Compare",
+        "Historischer Backtest 2019",
         "Out-of-sample-Prognosen eines HGB-Modells, das für diesen Vergleich "
-        "nur 2015–2018 gesehen hat."
+        "nur 2015–2018 gesehen hat.",
     )
     data = load_backtest()
 
-    country = st.selectbox(
-        "Land",
-        options=list(COUNTRY_LABELS),
-        format_func=COUNTRY_LABELS.get,
-        key="backtest_country",
-    )
-    country_data = data.loc[data["country"].eq(country)].copy()
-    available_dates = sorted(country_data["local_date"].dt.date.unique())
-    default_date = date(2019, 1, 15)
-    if default_date not in available_dates:
-        default_date = available_dates[0]
-    selected_date = st.date_input(
-        "Tag im unangetasteten Testjahr",
-        value=default_date,
-        min_value=available_dates[0],
-        max_value=available_dates[-1],
-        key="backtest_date",
-    )
+    with st.container(border=True):
+        country_col, date_col, note_col = st.columns([1, 1, 1.35])
+        with country_col:
+            country = st.radio(
+                "Land",
+                options=list(COUNTRY_REGISTRY),
+                format_func=lambda code: COUNTRY_SHORT_LABELS[code],
+                key="backtest_country",
+                horizontal=True,
+            )
+        country_data = data.loc[data["country"].eq(country)].copy()
+        available_dates = sorted(country_data["local_date"].dt.date.unique())
+        default_date = date(2019, 1, 15)
+        if default_date not in available_dates:
+            default_date = available_dates[0]
+        with date_col:
+            selected_date = st.date_input(
+                "Tag im unangetasteten Testjahr",
+                value=default_date,
+                min_value=available_dates[0],
+                max_value=available_dates[-1],
+                key="backtest_date",
+            )
+        with note_col:
+            st.markdown(
+                """
+                <div class="gc-note" style="padding-top:1.75rem;">
+                    <b>Leselogik:</b> Dunkel = Istwert, Türkis = HGB,
+                    orange gestrichelt = starke Kalender-Baseline.
+                    Hover zeigt die exakten Stundenwerte.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
     day = country_data.loc[
         country_data["local_date"].dt.date.eq(selected_date)
@@ -188,23 +829,19 @@ def render_backtest() -> None:
     nmae = 100.0 * mae / float(np.mean(np.abs(actual)))
     baseline_mae = float(np.mean(np.abs(actual - calendar)))
     improvement = 100.0 * (baseline_mae - mae) / baseline_mae
+    largest_error_index = int(np.argmax(np.abs(actual - hgb)))
+    largest_error_hour = int(day.iloc[largest_error_index]["local_hour"])
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Tages-MAE HGB", format_mw(mae))
     col2.metric("Tages-nMAE HGB", format_pct(nmae, 2))
-    col3.metric("Verbesserung vs. Kalender", format_pct(improvement, 1))
-    col4.metric("Beobachtete Stunden", str(len(day)))
+    col3.metric("Fehlerreduktion vs. Kalender", format_pct(improvement, 1))
+    col4.metric("Größte Abweichung um", format_hour(largest_error_hour))
 
-    chart = day.set_index("utc_timestamp")[
-        ["actual_load_mw", "hgb_prediction_mw", "calendar_prediction_mw"]
-    ].rename(
-        columns={
-            "actual_load_mw": "Tatsächliche Last",
-            "hgb_prediction_mw": "HGB-Prognose",
-            "calendar_prediction_mw": "Kalender-Baseline",
-        }
+    st.altair_chart(
+        build_backtest_chart(day),
+        use_container_width=True,
     )
-    st.line_chart(chart, height=430, y_label="Last (MW)")
 
     if len(day) != 24:
         st.info(
@@ -212,7 +849,7 @@ def render_backtest() -> None:
             f"{len(day)} statt 24 beobachtete Stunden."
         )
 
-    with st.expander("Stundendaten anzeigen"):
+    with st.expander("Stundendaten und exakte Fehlerwerte"):
         table = day[
             [
                 "utc_timestamp",
@@ -223,6 +860,9 @@ def render_backtest() -> None:
                 "calendar_prediction_mw",
             ]
         ].copy()
+        table["HGB-Fehler (MW)"] = (
+            table["actual_load_mw"] - table["hgb_prediction_mw"]
+        ).abs()
         table.columns = [
             "UTC-Zeit",
             "Lokale Stunde",
@@ -230,78 +870,210 @@ def render_backtest() -> None:
             "Ist (MW)",
             "HGB (MW)",
             "Kalender (MW)",
+            "HGB-Fehler (MW)",
         ]
-        st.dataframe(table, hide_index=True, use_container_width=True)
+        st.dataframe(
+            table.style.format(
+                {
+                    "Temperatur (°C)": "{:.1f}",
+                    "Ist (MW)": "{:,.0f}",
+                    "HGB (MW)": "{:,.0f}",
+                    "Kalender (MW)": "{:,.0f}",
+                    "HGB-Fehler (MW)": "{:,.0f}",
+                }
+            ),
+            hide_index=True,
+            width="stretch",
+        )
+
+
+def initialize_scenario_state() -> None:
+    if "scenario_preset" not in st.session_state:
+        st.session_state["scenario_preset"] = "Historische Referenz"
+    preset = SCENARIO_PRESETS[st.session_state["scenario_preset"]]
+    st.session_state.setdefault(
+        "scenario_temperature_delta",
+        preset["temperature_delta"],
+    )
+    st.session_state.setdefault(
+        "scenario_demand_change",
+        preset["demand_change"],
+    )
+    st.session_state.setdefault(
+        "scenario_data_centre_mw",
+        preset["data_centre_mw"],
+    )
+
+
+def apply_scenario_preset(name: str) -> None:
+    st.session_state["scenario_preset"] = name
+    preset = SCENARIO_PRESETS[name]
+    st.session_state["scenario_temperature_delta"] = preset[
+        "temperature_delta"
+    ]
+    st.session_state["scenario_demand_change"] = preset["demand_change"]
+    st.session_state["scenario_data_centre_mw"] = preset["data_centre_mw"]
+
+
+def build_scenario_chart(scenario: pd.DataFrame) -> alt.Chart:
+    chart_data = (
+        scenario[
+            [
+                "local_hour",
+                "base_prediction_mw",
+                "weather_prediction_mw",
+                "scenario_prediction_mw",
+            ]
+        ]
+        .rename(
+            columns={
+                "base_prediction_mw": "Referenzprofil",
+                "weather_prediction_mw": "Nur Temperaturänderung",
+                "scenario_prediction_mw": "Gesamtszenario",
+            }
+        )
+        .melt(
+            id_vars="local_hour",
+            var_name="Reihe",
+            value_name="Last_MW",
+        )
+    )
+    order = [
+        "Referenzprofil",
+        "Nur Temperaturänderung",
+        "Gesamtszenario",
+    ]
+    return (
+        alt.Chart(chart_data)
+        .mark_line(point=alt.OverlayMarkDef(size=45), strokeWidth=2.8)
+        .encode(
+            x=alt.X(
+                "local_hour:Q",
+                title="Lokale Stunde",
+                scale=alt.Scale(domain=[0, 23]),
+                axis=alt.Axis(values=list(range(0, 24, 2))),
+            ),
+            y=alt.Y(
+                "Last_MW:Q",
+                title="Last (MW)",
+                scale=alt.Scale(zero=False),
+            ),
+            color=alt.Color(
+                "Reihe:N",
+                title=None,
+                scale=alt.Scale(
+                    domain=order,
+                    range=[SERIES_COLORS[name] for name in order],
+                ),
+                sort=order,
+                legend=alt.Legend(orient="top", direction="horizontal"),
+            ),
+            strokeDash=alt.StrokeDash(
+                "Reihe:N",
+                title=None,
+                scale=alt.Scale(
+                    domain=order,
+                    range=[[7, 4], [3, 3], [1, 0]],
+                ),
+                sort=order,
+                legend=None,
+            ),
+            tooltip=[
+                alt.Tooltip("local_hour:Q", title="Lokale Stunde"),
+                alt.Tooltip("Reihe:N", title="Reihe"),
+                alt.Tooltip("Last_MW:Q", title="Last (MW)", format=",.0f"),
+            ],
+        )
+        .properties(height=440)
+        .configure_view(stroke=None)
+        .configure_axis(gridColor="#E5ECF1", domainColor="#B8C7D2")
+    )
 
 
 def render_scenario() -> None:
-    st.title("Konditionales Zukunftsszenario")
-    st.caption(
+    render_page_header(
+        "K · Knowledge Transfer",
+        "Konditionales Zukunftsszenario",
         "Was-wäre-wenn-Rechnung mit typischem Wetter und transparenten "
-        "Strukturannahmen – keine autonome Langfristprognose."
+        "Strukturannahmen – keine autonome Langfristprognose.",
     )
+    initialize_scenario_state()
 
-    controls, explanation = st.columns([1, 1.45])
-    with controls:
-        country = st.selectbox(
-            "Land",
-            options=list(COUNTRY_LABELS),
-            format_func=COUNTRY_LABELS.get,
-            key="scenario_country",
-        )
-        target_date = st.date_input(
-            "Szenariodatum",
-            value=date(2030, 1, 15),
-            min_value=date(2020, 1, 1),
-            max_value=date(2050, 12, 31),
-            key="scenario_date",
-        )
-        temperature_delta = st.slider(
-            "Temperaturabweichung gegenüber dem typischen Profil (°C)",
-            min_value=-5.0,
-            max_value=5.0,
-            value=0.0,
-            step=0.5,
-        )
-        demand_change_pct = st.slider(
-            "Strukturelle Nachfrageänderung (%)",
-            min_value=-20,
-            max_value=50,
-            value=0,
-            step=1,
-        )
-        data_centre_mw = st.slider(
-            "Zusätzliche konstante Rechenzentrumslast (MW)",
-            min_value=0,
-            max_value=5_000,
-            value=0,
-            step=100,
-        )
-        quantile = st.select_slider(
-            "Historische Extremzustandsschwelle",
-            options=[0.95, 0.99],
-            value=0.95,
-            format_func=lambda value: f"{int(100 * value)}-%-Quantil",
-        )
+    st.markdown("### Vordefinierte Stressannahmen")
+    st.caption(
+        "Ein Preset setzt nachvollziehbare Startwerte. Anschließend können "
+        "alle Annahmen manuell feinjustiert werden."
+    )
+    preset_columns = st.columns(len(SCENARIO_PRESETS))
+    for index, (name, preset) in enumerate(SCENARIO_PRESETS.items()):
+        with preset_columns[index]:
+            st.button(
+                f"{preset['icon']} {name}",
+                key=f"scenario_preset_{index}",
+                type=(
+                    "primary"
+                    if st.session_state["scenario_preset"] == name
+                    else "secondary"
+                ),
+                width="stretch",
+                on_click=apply_scenario_preset,
+                args=(name,),
+            )
+    active_preset = SCENARIO_PRESETS[st.session_state["scenario_preset"]]
+    st.info(active_preset["description"], icon="💡")
 
-    with explanation:
-        st.markdown(
-            """
-            **Rechenlogik**
-
-            1. Kalendermerkmale folgen dem gewählten Datum.
-            2. Wetter ist der historische Median für Land, Monat und Stunde.
-            3. Die Temperaturabweichung wird *vor* der ML-Inferenz angewendet.
-            4. Nachfrageänderung und Rechenzentrumslast werden *nach* der
-               ML-Inferenz transparent addiert.
-            """
+    with st.container(border=True):
+        identity_col, temp_col, demand_col, data_col = st.columns(
+            [1.05, 1, 1, 1]
         )
-        st.warning(
-            "Die Extremzustandswahrscheinlichkeit bezeichnet nur die "
-            "Überschreitung einer historischen nationalen Lastschwelle. "
-            "Sie ist keine Blackout-, Netzüberlastungs- oder "
-            "Versorgungsausfallwahrscheinlichkeit."
-        )
+        with identity_col:
+            country = st.radio(
+                "Land",
+                options=list(COUNTRY_REGISTRY),
+                format_func=lambda code: COUNTRY_SHORT_LABELS[code],
+                key="scenario_country",
+                horizontal=True,
+            )
+            target_date = st.date_input(
+                "Szenariodatum",
+                value=date(2030, 1, 15),
+                min_value=date(2020, 1, 1),
+                max_value=date(2050, 12, 31),
+                key="scenario_date",
+            )
+        with temp_col:
+            temperature_delta = st.slider(
+                "Temperaturabweichung (°C)",
+                min_value=-5.0,
+                max_value=5.0,
+                step=0.5,
+                key="scenario_temperature_delta",
+                help="Abweichung vom historischen Medianprofil des Monats.",
+            )
+        with demand_col:
+            demand_change_pct = st.slider(
+                "Nachfrageänderung (%)",
+                min_value=-20,
+                max_value=50,
+                step=1,
+                key="scenario_demand_change",
+                help="Transparenter Strukturaufschlag nach der ML-Inferenz.",
+            )
+        with data_col:
+            data_centre_mw = st.slider(
+                "Rechenzentrumslast (MW)",
+                min_value=0,
+                max_value=5_000,
+                step=100,
+                key="scenario_data_centre_mw",
+                help="Zusätzliche konstante Last in jeder Szenariostunde.",
+            )
+            quantile = st.select_slider(
+                "Extremzustandsschwelle",
+                options=[0.95, 0.99],
+                value=0.99,
+                format_func=lambda value: f"{int(100 * value)}-%-Quantil",
+            )
 
     model = load_model()
     climatology = load_climatology()
@@ -333,43 +1105,64 @@ def render_scenario() -> None:
     )
     scenario["extreme_state_probability"] = hourly_probability
 
+    base_energy = summary["base_energy_mwh"]
+    scenario_energy = summary["scenario_energy_mwh"]
+    energy_delta = scenario_energy - base_energy
+    energy_delta_pct = 100 * energy_delta / base_energy
+    base_peak_hour = int(
+        scenario.loc[scenario["base_prediction_mw"].idxmax(), "local_hour"]
+    )
+    scenario_peak_hour = int(
+        scenario.loc[
+            scenario["scenario_prediction_mw"].idxmax(),
+            "local_hour",
+        ]
+    )
+    base_hours_above = int(
+        (scenario["base_prediction_mw"] > threshold).sum()
+    )
+    scenario_hours_above = int(
+        (scenario["scenario_prediction_mw"] > threshold).sum()
+    )
+
+    st.markdown("### Ergebnis gegenüber der historischen Referenz")
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Spitze Basisszenario", format_mw(summary["base_peak_mw"]))
-    col2.metric(
-        "Spitze Gesamtszenario",
+    col1.metric(
+        "Szenario-Lastspitze",
         format_mw(summary["scenario_peak_mw"]),
         delta=format_mw(summary["peak_delta_mw"]),
     )
+    col2.metric(
+        "Szenario-Tagesenergie",
+        format_mwh(scenario_energy),
+        delta=f"{format_mwh(energy_delta)} · {format_pct(energy_delta_pct, 1)}",
+    )
     col3.metric(
-        "Relative Spitzenänderung",
-        format_pct(summary["peak_delta_pct"], 1),
+        "Zeitpunkt der Spitze",
+        format_hour(scenario_peak_hour),
+        delta=f"Referenz: {format_hour(base_peak_hour)}",
+        delta_color="off",
     )
     col4.metric(
-        "P(mind. eine Extremstunde)",
-        format_pct(100 * day_probability, 1),
+        f"Stunden über Q{int(100 * quantile)}",
+        f"{scenario_hours_above} von 24",
+        delta=f"Referenz: {base_hours_above}",
+        delta_color="off",
     )
 
-    chart = scenario.set_index("local_hour")[
-        ["base_prediction_mw", "weather_prediction_mw", "scenario_prediction_mw"]
-    ].rename(
-        columns={
-            "base_prediction_mw": "Basisszenario",
-            "weather_prediction_mw": "Nur Temperaturänderung",
-            "scenario_prediction_mw": "Gesamtszenario",
-        }
+    profile_tab, values_tab, logic_tab = st.tabs(
+        [
+            "📈 Lastprofil",
+            "🔢 Zukunftswerte",
+            "🧭 Einordnung",
+        ]
     )
-    st.line_chart(chart, height=430, x_label="Lokale Stunde", y_label="Last (MW)")
-
-    st.markdown(
-        f"""
-        **Schwellenreferenz:** {int(100 * quantile)}-%-Quantil der Last aus
-        2015–2017 für {COUNTRY_REGISTRY[country].name} =
-        **{format_mw(threshold)}**. Die Unsicherheit basiert auf vollständigen
-        24-Stunden-Residualpfaden der Validierung 2018.
-        """
-    )
-
-    with st.expander("Stündliche Szenariowerte anzeigen"):
+    with profile_tab:
+        st.altair_chart(
+            build_scenario_chart(scenario),
+            use_container_width=True,
+        )
+    with values_tab:
         table = scenario[
             [
                 "local_hour",
@@ -386,44 +1179,115 @@ def render_scenario() -> None:
             "Lokale Stunde",
             "Typische Temperatur (°C)",
             "Szenariotemperatur (°C)",
-            "Basis (MW)",
+            "Referenz (MW)",
             "Nur Wetter (MW)",
-            "Gesamt (MW)",
+            "Gesamtszenario (MW)",
             "P(Extremzustand) (%)",
         ]
-        st.dataframe(table, hide_index=True, use_container_width=True)
+        st.dataframe(
+            table.style.format(
+                {
+                    "Typische Temperatur (°C)": "{:.1f}",
+                    "Szenariotemperatur (°C)": "{:.1f}",
+                    "Referenz (MW)": "{:,.0f}",
+                    "Nur Wetter (MW)": "{:,.0f}",
+                    "Gesamtszenario (MW)": "{:,.0f}",
+                    "P(Extremzustand) (%)": "{:.1f}",
+                }
+            ),
+            hide_index=True,
+            width="stretch",
+        )
+    with logic_tab:
+        logic_col, warning_col = st.columns(2, gap="large")
+        with logic_col:
+            st.markdown(
+                """
+                **Rechenlogik**
+
+                1. Kalendermerkmale folgen dem gewählten Datum.
+                2. Wetter ist der historische Median nach Land, Monat und Stunde.
+                3. Die Temperaturabweichung wird vor der ML-Inferenz angewendet.
+                4. Nachfrage und Rechenzentrumslast werden danach transparent addiert.
+                """
+            )
+        with warning_col:
+            st.warning(
+                "Der Extremzustandsindikator bezeichnet ausschließlich die "
+                "Überschreitung einer historischen nationalen Lastschwelle. "
+                "Er ist keine Blackout-, Netzüberlastungs- oder "
+                "Versorgungsausfallwahrscheinlichkeit."
+            )
+
+    st.markdown(
+        f"""
+        **Schwellenreferenz:** {int(100 * quantile)}-%-Quantil der Last aus
+        2015–2017 für {COUNTRY_REGISTRY[country].name} =
+        **{format_mw(threshold)}**. Die Unsicherheit basiert auf vollständigen
+        24-Stunden-Residualpfaden der Validierung 2018. Daraus ergibt sich für
+        dieses Szenario eine empirische Wahrscheinlichkeit von
+        **{format_pct(100 * day_probability, 1)}** für mindestens eine
+        Extremstunde.
+        """
+    )
 
 
 def render_methodology() -> None:
     report = load_k_report()
-    st.title("Methodik und Grenzen")
-    st.markdown(
-        """
-        ### QUA³CK in fünf Schritten
-
-        - **Q – Question:** Prognosefrage, Hypothesen und Erfolgsregeln vorab festgelegt.
-        - **U – Understanding:** 131.441 Länder-Stunden aus Last- und Wetterdaten geprüft.
-        - **A³ – Algorithms:** Baselines, Ridge und Histogram Gradient Boosting auf 2018 verglichen.
-        - **C – Conclude:** eingefrorenes HGB einmalig auf 2019 getestet.
-        - **K – Knowledge Transfer:** Modell, Szenariologik und Ergebnisse in dieser App bereitgestellt.
-        """
+    render_page_header(
+        "Methodik · Reproduzierbarkeit · Grenzen",
+        "Wie belastbar ist GridCast?",
+        "Die App trennt gemessene Modellgüte, illustrative Szenarien und "
+        "technische Reproduzierbarkeit sichtbar voneinander.",
     )
 
-    st.markdown("### Belastbares Ergebnis")
-    metrics = pd.DataFrame(
-        [
-            ["Ländermittelwert", "15,64 %", "triviale Referenz"],
-            ["Kalender-Baseline", "4,88 %", "starke Referenz"],
-            ["HGB + Feiertag + Wetter", "2,71 %", "final ausgewählt"],
-        ],
-        columns=["Modell", "Makro-nMAE 2019", "Rolle"],
-    )
-    st.dataframe(metrics, hide_index=True, use_container_width=True)
+    st.markdown("### QUA³CK in fünf Schritten")
+    phases = [
+        ("Q", "Question", "Frage, Hypothesen und Erfolgskriterien"),
+        ("U", "Understanding", "131.441 geprüfte Länder-Stunden"),
+        ("A³", "Algorithms", "Baselines, Ridge und HGB auf 2018"),
+        ("C", "Conclude", "Eingefrorenes HGB einmalig auf 2019"),
+        ("K", "Transfer", "Modell, App und Prüfungsartefakte"),
+    ]
+    phase_columns = st.columns(5)
+    for column, (letter, name, description) in zip(phase_columns, phases):
+        with column:
+            with st.container(border=True):
+                st.markdown(f"### {letter}")
+                st.markdown(f"**{name}**")
+                st.caption(description)
+
+    result_col, boundary_col = st.columns([1.05, 0.95], gap="large")
+    with result_col:
+        st.markdown("### Belastbares Ergebnis")
+        metrics = pd.DataFrame(
+            [
+                ["Ländermittelwert", "15,64 %", "triviale Referenz"],
+                ["Kalender-Baseline", "4,88 %", "starke Referenz"],
+                ["HGB + Feiertag + Wetter", "2,71 %", "final ausgewählt"],
+            ],
+            columns=["Modell", "Makro-nMAE 2019", "Rolle"],
+        )
+        st.dataframe(metrics, hide_index=True, width="stretch")
+        st.success(
+            "Das finale HGB reduziert den Fehler gegenüber der starken "
+            "Kalender-Baseline um 44,5 %."
+        )
+    with boundary_col:
+        st.markdown("### Geltungsbereich")
+        st.markdown(
+            """
+            - **Länder:** Deutschland, Frankreich und Polen
+            - **Datenperiode:** OPSD 2015–2019
+            - **Primärmetrik:** länderweise gleichgewichteter Makro-nMAE
+            - **Test:** vollständiges, unangetastetes Kalenderjahr 2019
+            - **Extremzustand:** nationale historische Quantilsüberschreitung
+            """
+        )
 
     st.markdown("### Grenzen")
     st.markdown(
         """
-        - Gültig für DE, FR und PL sowie die OPSD-Periode 2015–2019.
         - Reanalysewetter im Backtest ist keine echte Wettervorhersage.
         - Regionale deutsche Feiertage sind nicht separat modelliert.
         - Zukunftsaufschläge sind Annahmen, keine kausal gelernten Langfristtrends.
@@ -433,29 +1297,33 @@ def render_methodology() -> None:
         """
     )
 
-    with st.expander("Reproduzierbarkeit"):
-        st.json(report, expanded=False)
+    with st.expander("Technischer Deployment- und Reproduzierbarkeitsstatus"):
+        st.caption(
+            "Dieser technische Block wurde bewusst aus der Überblicksseite "
+            "in die Methodik verschoben."
+        )
+        deployment_summary = {
+            "Modellartefakt": report["model"]["path"],
+            "SHA-256": report["model"]["sha256"],
+            "Trainingsperiode": report["model"]["training_period"],
+            "Unabhängige Qualitätsquelle": report["model"][
+                "independent_quality_source"
+            ],
+            "Smoke-Tests": report["verification"]["passed"],
+            "App-Daten": report["app_assets"],
+        }
+        st.json(deployment_summary, expanded=False)
 
 
-st.sidebar.title("GridCast Europe")
-page = st.sidebar.radio(
-    "Ansicht",
-    [
-        "Überblick",
-        "Historischer Backtest",
-        "Zukunftsszenario",
-        "Methodik",
-    ],
-)
-st.sidebar.markdown("---")
-st.sidebar.caption("IU · Data Analytics und Big Data · Tajan Biazevic · 2026")
+apply_visual_theme()
+page = render_sidebar()
 
 try:
-    if page == "Überblick":
+    if page == "🏠 Überblick":
         render_overview()
-    elif page == "Historischer Backtest":
+    elif page == "🧪 Historischer Backtest":
         render_backtest()
-    elif page == "Zukunftsszenario":
+    elif page == "🔭 Zukunftsszenario":
         render_scenario()
     else:
         render_methodology()

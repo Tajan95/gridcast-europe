@@ -76,7 +76,7 @@ Die K-Phase überführt das Projekt in eine Streamlit-Anwendung mit vier klar ge
 
 Methodisch wichtig: Der historische Backtest zeigt vorab berechnete C-Prognosen. Das später auf 2015 bis 2019 refittete App-Modell wird nicht verwendet, um 2019 rückwirkend besser aussehen zu lassen.
 
-Die Zukunftsansicht ist eine transparente Was-wäre-wenn-Rechnung und wird entsprechend beschriftet.
+Die Übersicht nutzt eine interaktive Europakarte. Im Backtest sind Istwert, HGB und die gestrichelte Kalender-Baseline mit exakten Hoverwerten vergleichbar. Die Zukunftsansicht bietet fünf Presets und bleibt als transparente Was-wäre-wenn-Rechnung beschriftet.
 
 Quelle: streamlit_app/app.py und notebooks/04_knowledge_transfer.md.
 
@@ -90,6 +90,8 @@ Nachfrageänderung und zusätzliche Rechenzentrumslast werden danach als explizi
 
 Das Beispielszenario erhöht die modellierte Spitzenlast um 10,24 Prozent. Es ist keine konkrete Prognose für 2030.
 
+Die fünf Presets sind illustrative Einstiegspunkte. Zusätzlich zeigt die App Tagesenergie, Spitzenzeit und Stunden oberhalb der historischen Quantilschwelle; alle Annahmen bleiben manuell veränderbar.
+
 Der Risikoindikator bezeichnet nur die Wahrscheinlichkeit einer historischen nationalen Quantilsüberschreitung, ausdrücklich nicht die Wahrscheinlichkeit eines Blackouts.
 
 Quelle: src/gridcast/scenario.py, src/gridcast/risk.py und reports/k_deployment.json.
@@ -100,9 +102,9 @@ Zeit: ca. 60 Sekunden.
 
 Das finale Joblib-Artefakt ist rund 1,9 Megabyte groß, hat eine feste Prüfsumme und liegt im Repository.
 
-Elf Funktionstests bestehen. Außerdem startet die App unter Streamlit 1.50 und Python 3.12; der Health-Endpunkt antwortet mit OK.
+Elf Funktionstests bestehen. Zusätzlich laufen alle vier App-Ansichten und die Preset-Neuberechnung ohne Ausnahme.
 
-Das Community-Cloud-Deployment ist eingerichtet. Der erste Plattformstart lief allerdings unter Python 3.14.6 statt der lokal verifizierten Python-3.12-Umgebung und endete mit einem nativen Prozessabsturz. Die Laufzeitkonfiguration wird deshalb separat korrigiert.
+Das Community-Cloud-Deployment läuft stabil unter Python 3.12.13. Durch die Trennung von App- und Entwicklungsabhängigkeiten sank die Cloud-Umgebung von 129 auf 41 Pakete; der frühere native Absturz unter Python 3.14.6 tritt damit nicht mehr auf.
 
 Quelle: reports/k_deployment.json und notebooks/04_knowledge_transfer.md.
 

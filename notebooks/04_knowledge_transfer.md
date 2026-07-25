@@ -1,7 +1,7 @@
 # K – Knowledge Transfer
 
 **Stand:** 25.07.2026  
-**Status:** Projektartefakte abgeschlossen; Cloud-Laufzeitkorrektur ausstehend
+**Status:** Projektartefakte abgeschlossen; Cloud-Deployment stabil aktiv
 
 ## Ziel der Phase
 
@@ -29,10 +29,10 @@ Featuregruppe und Hyperparameter werden dabei nicht nachträglich verändert.
 
 | Ansicht | Zweck | Datengrundlage |
 |---|---|---|
-| Überblick | Forschungsfrage und Kernergebnisse | C- und K-Reports |
-| Historischer Backtest | Istwert, HGB und Kalender-Baseline nach Tag | echte Out-of-sample-Prognosen 2019 |
-| Zukunftsszenario | typische Wetter- und Strukturannahmen variieren | finales App-Modell und Klimatologie |
-| Methodik | QUA³CK, Modellvergleich und Grenzen | versionierte Projektartefakte |
+| Überblick | Kernergebnisse und interaktive Europakarte für DE/FR/PL | C-Backtest 2019 und K-Reports |
+| Historischer Backtest | Istwert, HGB und gestrichelte Kalender-Baseline mit Hoverwerten | echte Out-of-sample-Prognosen 2019 |
+| Zukunftsszenario | fünf Presets, manuelle Annahmen und Zukunftsvergleichswerte | finales App-Modell, Klimatologie und Risikokalibrierung |
+| Methodik | QUA³CK, Modellvergleich, Grenzen und technischer Status | versionierte Projektartefakte |
 
 ## Historischer Backtest und App-Modell
 
@@ -70,6 +70,19 @@ f_{ML}(C_{c,t}, W^{typ}_{c,t}+\Delta T)\cdot(1+g)
 
 Das Ergebnis ist eine Was-wäre-wenn-Rechnung. Es ist weder eine konkrete
 Wettervorhersage noch eine autonome Lastprognose bis 2030 oder 2050.
+
+Die App bietet fünf illustrative Einstiegspunkte:
+
+- historische Referenz,
+- kalter Wintertag,
+- Elektrifizierung,
+- Rechenzentrumsboom,
+- kombinierter Stresstest.
+
+Jedes Preset setzt ausschließlich sichtbare Startwerte; alle Annahmen bleiben
+manuell veränderbar. Angezeigt werden Szenario-Lastspitze, Tagesenergie,
+Spitzenzeit und Stunden oberhalb der gewählten historischen Quantilschwelle.
+Das 99-%-Quantil ist der bewusst konservativere Standard.
 
 ## Wahrscheinlichkeit eines extremen Lastzustands
 
@@ -158,6 +171,8 @@ Bestanden sind:
 - gültige 24-Stunden-Szenarioinferenz,
 - elf Modell-, Szenario-, Risiko- und App-Strukturtests,
 - lokaler Streamlit-Serverstart mit erfolgreichem Health-Check,
+- fehlerfreie Ausführung aller vier App-Ansichten,
+- Preset-Interaktion mit Neuberechnung aller Szenariokennzahlen,
 - prüfsummenbasierte Kontrolle aller App-Daten.
 
 ## Bereitstellung
@@ -169,10 +184,12 @@ streamlit run streamlit_app/app.py
 
 Das Community-Cloud-Deployment ist unter
 [gridcast-europe.streamlit.app](https://gridcast-europe.streamlit.app/)
-eingerichtet. Der erste Cloud-Start verwendete Python 3.14.6 und endete noch
-vor einer App-spezifischen Fehlermeldung mit einem nativen `Segmentation
-fault`. Die lokal unter Python 3.12 verifizierten Ergebnisse und Artefakte
-bleiben davon unberührt; die Cloud-Laufzeit wird separat korrigiert.
+stabil aktiv. Die Laufzeit wurde ausdrücklich auf Python 3.12.13 festgelegt;
+gleichzeitig wurde die Cloud-`requirements.txt` auf sieben direkte
+App-Abhängigkeiten reduziert. Dadurch sank die aufgelöste Umgebung von 129 auf
+41 Pakete und die App startet ohne den zuvor unter Python 3.14.6 beobachteten
+nativen Prozessabsturz. Notebook- und Entwicklungswerkzeuge bleiben getrennt
+in `requirements-dev.txt`.
 
 ## Grenzen und Wartung
 
@@ -182,4 +199,3 @@ bleiben davon unberührt; die Cloud-Laufzeit wird separat korrigiert.
 - Das final refittete App-Modell besitzt keine neue unabhängige Kennzahl.
 - Neue Länder erfordern denselben Qualitäts-, Join- und Evaluationsprozess.
 - Neue Datenstände erfordern eine erneute QUA³CK-Schleife ab U/A³.
-

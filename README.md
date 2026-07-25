@@ -7,10 +7,10 @@ historischen Backtest mit einer klar getrennten Zukunftsszenarioanalyse.
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://gridcast-europe.streamlit.app/)
 
-> **Cloud-Status (25.07.2026):** Das Deployment ist eingerichtet. Der erste
-> Plattformstart endete unter der dort gewählten Python-3.14-Laufzeit mit einem
-> nativen Prozessabsturz; die lokal unter Python 3.12 verifizierte App und alle
-> Projektartefakte sind davon unberührt.
+> **Cloud-Status (25.07.2026):** Die App ist unter Python 3.12.13 stabil
+> bereitgestellt. Die auf die App reduzierte Laufzeitumgebung installiert
+> 41 statt zuvor 129 Pakete und vermeidet den nativen Absturz der automatisch
+> gewählten Python-3.14-Laufzeit.
 
 ## Forschungsfrage
 
@@ -86,9 +86,10 @@ python -m pip install -r requirements.txt
 streamlit run streamlit_app/app.py
 ```
 
-Die App umfasst Überblick, historischen Backtest, Zukunftsszenario sowie
-Methodik und Grenzen. Für die Inferenz wird ausschließlich das verifizierte
-Modell
+Die App umfasst eine interaktive Europakarte, einen historischen Backtest mit
+Hoverwerten, fünf illustrative Szenario-Presets, manuelle Annahmen,
+Zukunftsvergleichswerte sowie Methodik und Grenzen. Für die Inferenz wird
+ausschließlich das verifizierte Modell
 [`models/gridcast_final_2015_2019.joblib`](models/gridcast_final_2015_2019.joblib)
 verwendet.
 

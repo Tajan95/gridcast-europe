@@ -11,6 +11,10 @@ def test_streamlit_app_and_deployment_assets_exist():
     ast.parse(source)
     assert "Historischer Backtest" in source
     assert "Zukunftsszenario" in source
+    assert "EUROPE_TOPOJSON_URL" in source
+    assert "Kombinierter Stresstest" in source
+    assert "value=0.99" in source
+    assert "Technischer Deployment- und Reproduzierbarkeitsstatus" in source
     for relative_path in [
         "models/gridcast_final_2015_2019.joblib",
         "data/app/backtest_2019.csv.gz",
