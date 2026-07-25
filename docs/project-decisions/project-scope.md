@@ -1,6 +1,6 @@
 # Project Scope und Forschungsfragen
 
-**Stand:** 23.07.2026  
+**Stand:** 25.07.2026  
 **Status:** beschlossen
 
 ## Hauptfrage
@@ -37,13 +37,11 @@ Unmittelbar vorausgehende Lastmessungen wie `lag_24h`, `lag_48h` oder `lag_168h`
 
 ## Historischer Backtest
 
-Für Training und Bewertung werden die Daten chronologisch geteilt, vorläufig beispielsweise:
+Für Training und Bewertung wurde der chronologische Split nach der Datenqualitätsprüfung verbindlich festgelegt:
 
 - 2015–2017: Training,
 - 2018: Validierung,
 - 2019: unangetasteter Test.
-
-Der konkrete Zeitraum wird erst nach der Datenqualitätsprüfung festgelegt.
 
 Der Testzeitraum liegt innerhalb des vorhandenen historischen Datensatzes, wird dem Training jedoch vollständig vorenthalten. Das Modell erzeugt Prognosen aus den dortigen Kalender- und Wettermerkmalen; anschließend werden diese mit der tatsächlich gemessenen Last verglichen.
 
@@ -65,7 +63,7 @@ Eine weit außerhalb der Trainingsdaten liegende Ausgabe ist damit keine rekursi
 
 | Bestandteil | Festlegung |
 |---|---|
-| Raum | voraussichtlich drei europäische Länder; Auswahl nach Qualitätsprüfung |
+| Raum | Deutschland (`DE`), Frankreich (`FR`) und Polen (`PL`) |
 | Zeitauflösung | stündlich |
 | Evaluation | chronologischer Train-/Validierungs-/Test-Split |
 | Zielvariable | tatsächliche Stromlast in MW |
