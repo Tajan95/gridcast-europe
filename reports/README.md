@@ -1,4 +1,10 @@
 # Reports
 
-Dieser Ordner enthält später präsentationsfertige Abbildungen, Tabellen und Exportartefakte. Diagramme sollen aus der reproduzierbaren Analyse erzeugt und nicht manuell nachgebaut werden.
+Dieser Ordner enthält reproduzierbare Tabellen, Metriken und
+Präsentationsartefakte.
 
+- [`a3/`](a3/): Modellentwicklung und Auswahl auf der Validierung 2018
+- [`c/`](c/): eingefrorene Testauswertung auf 2019 und finales Modellfazit
+
+Diagramme werden direkt in den vollständig ausgeführten Notebooks gespeichert
+und nicht manuell nachgebaut.
