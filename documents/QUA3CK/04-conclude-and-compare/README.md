@@ -112,11 +112,12 @@ allen **131.441** nutzbaren Länder-Stunden von 2015–2019 trainiert:
 models/gridcast_final_2015_2019.joblib
 ```
 
-Das lokale Artefakt wurde nach dem Speichern in einem frischen Ladevorgang
-verifiziert. Es wird nicht versioniert, ist aber durch Code, Auswahlreport und
-C-Notebook reproduzierbar. Da 2019 im finalen Fit enthalten ist, besitzt dieses
-App-Modell keine zusätzliche unabhängige Testkennzahl. Maßgeblich bleibt die
-zuvor dokumentierte C-Auswertung.
+Das Artefakt wurde nach dem Speichern in einem frischen Ladevorgang
+verifiziert. In der K-Phase wird ausschließlich dieses finale, rund 1,9 MB
+große Deployment-Modell versioniert; Zwischenmodelle bleiben ignoriert. Da
+2019 im finalen Fit enthalten ist, besitzt dieses App-Modell keine zusätzliche
+unabhängige Testkennzahl. Maßgeblich bleibt die zuvor dokumentierte
+C-Auswertung.
 
 ## Grenzen
 

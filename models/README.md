@@ -13,7 +13,7 @@ Das Artefakt enthält die vollständige ausgewählte Inferenzpipeline:
 - Kalender-, Feiertags- und Wetterfeatures,
 - trainiertes Histogram-Gradient-Boosting-Modell.
 
-Die Binärdatei wird gemäß `.gitignore` nicht versioniert. Reproduzierbar
+Das A³-Zwischenmodell wird gemäß `.gitignore` nicht versioniert. Reproduzierbar
 versioniert werden stattdessen:
 
 - Trainings- und Auswahlcode in `src/gridcast/modeling.py`,
@@ -37,7 +37,22 @@ Da 2019 im finalen Fit enthalten ist, besitzt dieses App-Modell keine neue
 unabhängige Testkennzahl. Die unverfälschte Generalisierungsaussage stammt aus
 der vorherigen C-Auswertung mit Refit 2015–2018 und Test 2019.
 
-Das Binärmodell bleibt lokal. Reproduzierbar versioniert werden:
+Für das öffentliche Streamlit-Deployment wird ausschließlich dieses finale,
+verifizierte App-Modell versioniert. Mit **1.939.407 Byte** liegt es deutlich
+unterhalb der GitHub-Dateigrenze. Seine Integrität ist über folgende Prüfsumme
+kontrollierbar:
+
+```text
+SHA-256
+61526739582848fbe829cdd0a1328e1e7a247dc96f31003c19e95d2071567392
+```
+
+`joblib`-Dateien dürfen nur aus vertrauenswürdigen Quellen geladen werden, da
+das Format beim Deserialisieren Python-Code ausführen kann. Die App lädt
+ausschließlich das in diesem Repository veröffentlichte und per SHA-256
+dokumentierte Artefakt.
+
+Zusätzlich reproduzierbar versioniert werden:
 
 - das ausgeführte C-Notebook,
 - die unveränderte A³-Spezifikation,

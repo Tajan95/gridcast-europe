@@ -10,8 +10,10 @@ Verbindliche Reihenfolge:
    A³-Phase: Baselines, Feature-Ablationen, Modell- und Hyperparameterwahl
 4. [`03_conclude_compare.ipynb`](03_conclude_compare.ipynb)  
    C-Phase: Refit, einmalige Testauswertung 2019 und Schlussfolgerung
-5. `04_knowledge_transfer.ipynb`  
-   K-Phase: App-Modell, Szenarien und Wissenstransfer
+Die K-Phase benötigt kein zusätzliches Pflichtnotebook. Sie überführt die
+geprüften Notebook-Ergebnisse in `streamlit_app/`, kompakte Deployment-Daten,
+das finale Modell, Handout und Präsentation. Ihr reproduzierbarer
+Erzeugungsschritt liegt unter `scripts/build_k_artifacts.py`.
 
 Wiederverwendbare Funktionen liegen unter `src/gridcast/`. Die Notebooks
 orchestrieren diese Bausteine und speichern Erklärungen, Tabellen und

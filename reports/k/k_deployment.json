@@ -1,0 +1,101 @@
+{
+  "project": "GridCast Europe",
+  "phase": "K",
+  "status": "deployment_ready",
+  "created_on": "2026-07-25",
+  "model": {
+    "path": "models/gridcast_final_2015_2019.joblib",
+    "size_bytes": 1939407,
+    "sha256": "61526739582848fbe829cdd0a1328e1e7a247dc96f31003c19e95d2071567392",
+    "training_period": "2015-01-01/2019-12-31",
+    "independent_quality_source": "C-Backtest: Refit 2015–2018, Test 2019"
+  },
+  "backtest": {
+    "rows": 26275,
+    "macro_nMAE": 0.027061483741119885,
+    "matches_c_report": true
+  },
+  "risk_indicator": {
+    "meaning": "historische Quantilsüberschreitung; keine Blackout-Wahrscheinlichkeit",
+    "threshold_reference": "Training 2015–2017",
+    "residual_reference": "Validierung 2018",
+    "test_reference": "2019",
+    "evaluation": {
+      "DE": {
+        "residual_days_2018": 362,
+        "threshold_q95_mw": 70597.4,
+        "threshold_q99_mw": 73364.97,
+        "q95_test_2019": {
+          "complete_test_days": 362,
+          "observed_event_rate": 0.212707182320442,
+          "mean_predicted_probability": 0.3102469399590977,
+          "brier_score": 0.06566256435146155
+        }
+      },
+      "FR": {
+        "residual_days_2018": 359,
+        "threshold_q95_mw": 75337.55,
+        "threshold_q99_mw": 82762.44,
+        "q95_test_2019": {
+          "complete_test_days": 361,
+          "observed_event_rate": 0.12742382271468145,
+          "mean_predicted_probability": 0.1242679341661587,
+          "brier_score": 0.014586691354203122
+        }
+      },
+      "PL": {
+        "residual_days_2018": 362,
+        "threshold_q95_mw": 23622.747,
+        "threshold_q99_mw": 24732.0846,
+        "q95_test_2019": {
+          "complete_test_days": 362,
+          "observed_event_rate": 0.27348066298342544,
+          "mean_predicted_probability": 0.3075760813161991,
+          "brier_score": 0.047508651726947265
+        }
+      }
+    }
+  },
+  "scenario_smoke_test": {
+    "country": "DE",
+    "date": "2030-01-15",
+    "temperature_delta_c": 2.0,
+    "demand_change_pct": 10.0,
+    "additional_data_centre_load_mw": 500.0,
+    "base_peak_mw": 75014.25467364112,
+    "scenario_peak_mw": 82692.99497524282,
+    "peak_delta_mw": 7678.740301601705,
+    "peak_delta_pct": 10.236374853031633,
+    "base_energy_mwh": 1593996.7596844886,
+    "scenario_energy_mwh": 1757736.2085696268
+  },
+  "app_assets": {
+    "data/app/backtest_2019.csv.gz": {
+      "size_bytes": 667285,
+      "sha256": "bbfd8ca11bf20efb4731a737b8f58b809dbf6f1f199bfef35a952512b342409b",
+      "rows_or_arrays": 26275
+    },
+    "data/app/weather_climatology_1980_2019.csv.gz": {
+      "size_bytes": 11238,
+      "sha256": "c830689e001eb241848f8e8fe670449a0de6e6399204c360bbb938d3323f0cec",
+      "rows_or_arrays": 864
+    },
+    "data/app/risk_calibration_2018.npz": {
+      "size_bytes": 193004,
+      "sha256": "2debaca6556124956d202272093dfdcd246b35b00f1f2529f3c54921ab013766",
+      "rows_or_arrays": 1089
+    }
+  },
+  "verification": {
+    "passed": [
+      "C-Backtest exakt reproduziert",
+      "finales Modell frisch geladen",
+        "24 Szenariostunden vorhergesagt",
+        "keine nicht-endlichen Prognosen",
+        "Risiko-Residualpfade länderweise vollständig",
+        "11 Modell-, Szenario-, Risiko- und App-Strukturtests bestanden",
+        "Streamlit 1.50.0 unter Python 3.12 gestartet",
+        "Streamlit-Health-Endpunkt antwortet mit ok"
+      ]
+  }
+}

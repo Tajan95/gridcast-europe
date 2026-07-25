@@ -20,16 +20,10 @@ def _finite_values(values: Sequence[float], name: str) -> list[float]:
 
 
 def historical_quantile(values: Sequence[float], quantile: float) -> float:
-    """Return a linearly interpolated empirical quantile.
-
-    The intended input is historical load from the training period of one
-    country. Keeping threshold construction on training data avoids test
-    leakage.
-    """
+    """Return a linearly interpolated empirical quantile."""
 
     if not 0.0 <= quantile <= 1.0:
         raise ValueError("quantile must be between 0 and 1")
-
     ordered = sorted(_finite_values(values, "values"))
     position = (len(ordered) - 1) * quantile
     lower = math.floor(position)
@@ -45,18 +39,15 @@ def empirical_extreme_probabilities(
     validation_residuals_mw: Sequence[float],
     threshold_mw: float,
 ) -> list[float]:
-    """Estimate an exceedance probability for every forecast hour.
-
-    Residuals must be out-of-sample errors defined as actual minus forecast,
-    preferably from the validation period of the same country.
-    """
+    """Estimate an exceedance probability for every forecast hour."""
 
     forecasts = _finite_values(point_forecast_mw, "point_forecast_mw")
-    residuals = _finite_values(validation_residuals_mw, "validation_residuals_mw")
+    residuals = _finite_values(
+        validation_residuals_mw, "validation_residuals_mw"
+    )
     threshold = float(threshold_mw)
     if not math.isfinite(threshold):
         raise ValueError("threshold_mw must be finite")
-
     denominator = len(residuals)
     return [
         sum(forecast + residual > threshold for residual in residuals) / denominator
@@ -69,12 +60,7 @@ def extreme_day_probability(
     validation_residual_paths_mw: Sequence[Sequence[float]],
     threshold_mw: float,
 ) -> float:
-    """Estimate P(any forecast hour exceeds the threshold).
-
-    Complete residual paths preserve within-day dependence better than
-    independently sampled hourly residuals. Each path must have the same
-    length as the point forecast (normally 24 hours).
-    """
+    """Estimate P(any forecast hour exceeds the threshold)."""
 
     forecasts = _finite_values(point_forecast_mw, "point_forecast_mw")
     paths = [
@@ -85,14 +71,36 @@ def extreme_day_probability(
         raise ValueError("validation_residual_paths_mw must not be empty")
     if any(len(path) != len(forecasts) for path in paths):
         raise ValueError("each residual path must match the forecast length")
-
     threshold = float(threshold_mw)
     if not math.isfinite(threshold):
         raise ValueError("threshold_mw must be finite")
-
     exceedances = sum(
-        any(forecast + residual > threshold for forecast, residual in zip(forecasts, path))
+        any(
+            forecast + residual > threshold
+            for forecast, residual in zip(forecasts, path)
+        )
         for path in paths
     )
     return exceedances / len(paths)
 
+
+def brier_score(
+    observed_events: Sequence[float | int | bool],
+    predicted_probabilities: Sequence[float],
+) -> float:
+    """Berechnet den mittleren quadratischen Fehler probabilistischer Aussagen."""
+
+    observed = _finite_values(observed_events, "observed_events")
+    probabilities = _finite_values(
+        predicted_probabilities, "predicted_probabilities"
+    )
+    if len(observed) != len(probabilities):
+        raise ValueError("Beobachtungen und Wahrscheinlichkeiten müssen gleich lang sein")
+    if any(value not in (0.0, 1.0) for value in observed):
+        raise ValueError("observed_events darf nur 0/1 beziehungsweise False/True enthalten")
+    if any(not 0.0 <= value <= 1.0 for value in probabilities):
+        raise ValueError("predicted_probabilities muss zwischen 0 und 1 liegen")
+    return sum(
+        (probability - event) ** 2
+        for event, probability in zip(observed, probabilities)
+    ) / len(observed)

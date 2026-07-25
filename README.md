@@ -55,6 +55,16 @@ Eine angezeigte 24-Stunden-Kurve beschreibt den ausgewählten Kalendertag. Sie i
 - [C-Notebook: Refit, Test 2019 und Schlussfolgerung](notebooks/03_conclude_compare.ipynb)
 - [QUA³CK: C – Conclude & Compare](documents/QUA3CK/04-conclude-and-compare/README.md)
 - [C-Abschlussreport](reports/c/c_conclusion.json)
+- [QUA³CK: K – Knowledge Transfer](documents/QUA3CK/05-knowledge-transfer/README.md)
+- [Streamlit-App](streamlit_app/app.py)
+- [K-Deploymentreport](reports/k/k_deployment.json)
+- Fünfseitiges Handout:
+  [PDF](documents/handout/GridCast_Europe_Handout.pdf) |
+  [DOCX](documents/handout/GridCast_Europe_Handout.docx)
+- Vortragsfolien:
+  [PPTX](documents/presentation/GridCast_Europe_Referat.pptx) |
+  [PDF](documents/presentation/GridCast_Europe_Referat.pdf) |
+  [Sprechtext](documents/presentation/GridCast_Europe_Sprechtext.md)
 - [Länder-Scope und modulare Erweiterbarkeit](docs/project-decisions/country-scope-and-extensibility.md)
 - [Reproduzierbarer OPSD-Download](scripts/download_opsd_data.py)
 
@@ -85,8 +95,43 @@ streamlit_app/              interaktive Anwendung
 tests/                      automatisierte Tests
 ```
 
-Große Daten- und Modelldateien werden nicht in Git versioniert. Download und Aufbereitung sind reproduzierbar per Code umgesetzt.
+Rohdaten, große Modelldatensätze und Zwischenmodelle werden nicht in Git
+versioniert. Als enge Ausnahme liegt das rund 1,9 MB große, verifizierte
+Deployment-Modell unter
+[`models/gridcast_final_2015_2019.joblib`](models/gridcast_final_2015_2019.joblib).
+Download und Aufbereitung der Ausgangsdaten bleiben reproduzierbar per Code.
+
+## Streamlit-App lokal starten
+
+```bash
+python -m pip install -r requirements.txt
+streamlit run streamlit_app/app.py
+```
+
+Die App enthält:
+
+- Überblick mit Forschungsfrage und Kernergebnissen,
+- historischen Out-of-sample-Backtest für wählbare Tage aus 2019,
+- konditionale Zukunftsszenarien mit typischem Wetter,
+- Temperatur-, Nachfrage- und Rechenzentrumseinstellungen,
+- transparent begrenzten Extremzustandsindikator,
+- Methodik- und Grenzendarstellung.
+
+Für Streamlit Community Cloud:
+
+- Repository: `Tajan95/gridcast-europe`
+- Branch: `main`
+- Entrypoint: `streamlit_app/app.py`
+- Python: `3.12`
+- Secrets: keine
 
 ## Status
 
-Aktueller Stand: **Q-, U-, A³- und C-Phase abgeschlossen. Auf dem unangetasteten Testjahr 2019 erreicht das ausgewählte Histogram-Gradient-Boosting-Modell nach Refit auf 2015–2018 einen Makro-nMAE von 2,71 % und verbessert die Kalender-Baseline um 44,5 %. H3 und das praktische 5-%-Ziel sind bestätigt. Das finale App-Modell wurde anschließend mit unveränderter Konfiguration auf 2015–2019 trainiert und lokal verifiziert. Nächster Schritt: K-Phase mit Streamlit-App, Szenariologik, Handout und Präsentation.**
+Aktueller Stand: **Alle fünf QUA³CK-Phasen sind abgeschlossen. Auf dem
+unangetasteten Testjahr 2019 erreicht das ausgewählte
+Histogram-Gradient-Boosting-Modell nach Refit auf 2015–2018 einen Makro-nMAE
+von 2,71 % und verbessert die Kalender-Baseline um 44,5 %. Das finale
+App-Modell wurde mit unveränderter Konfiguration auf 2015–2019 trainiert,
+versioniert und in die getestete Streamlit-Anwendung integriert. Handout und
+Vortragsfolien liegen im Repository. Ausstehend ist nur die einmalige
+Aktivierung in Streamlit Community Cloud.**

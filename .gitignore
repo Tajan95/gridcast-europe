@@ -224,3 +224,4 @@ data/processed/*
 models/*
 !data/README.md
 !models/README.md
+!models/gridcast_final_2015_2019.joblib

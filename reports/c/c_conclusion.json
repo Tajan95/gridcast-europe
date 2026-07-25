@@ -62,7 +62,7 @@
     "training_period": "2015-01-01/2019-12-31",
     "rows": 131441,
     "artifact_path": "models/gridcast_final_2015_2019.joblib",
-    "artifact_versioned": false,
+    "artifact_versioned": true,
     "artifact_size_bytes": 1939407,
     "fit_seconds": 4.535178131998691,
     "reload_verified": true,
