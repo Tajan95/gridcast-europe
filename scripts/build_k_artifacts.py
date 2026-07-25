@@ -53,11 +53,10 @@ SELECTION_PATH = PROJECT_ROOT / "reports" / "a3" / "a3_selection.json"
 C_REPORT_PATH = PROJECT_ROOT / "reports" / "c" / "c_conclusion.json"
 
 APP_DATA_DIR = PROJECT_ROOT / "data" / "app"
-K_REPORT_DIR = PROJECT_ROOT / "reports" / "k"
 BACKTEST_PATH = APP_DATA_DIR / "backtest_2019.csv.gz"
 CLIMATOLOGY_TARGET_PATH = APP_DATA_DIR / "weather_climatology_1980_2019.csv.gz"
 RISK_PATH = APP_DATA_DIR / "risk_calibration_2018.npz"
-K_REPORT_PATH = K_REPORT_DIR / "k_deployment.json"
+K_REPORT_PATH = PROJECT_ROOT / "reports" / "k_deployment.json"
 
 
 MODEL_COLUMNS = [
@@ -160,7 +159,7 @@ def main() -> None:
         raise FileNotFoundError(f"Erforderliche Vorartefakte fehlen: {missing}")
 
     APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    K_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    K_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     selection = json.loads(SELECTION_PATH.read_text(encoding="utf-8"))
     c_report = json.loads(C_REPORT_PATH.read_text(encoding="utf-8"))

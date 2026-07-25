@@ -18,7 +18,7 @@ Der Wechsel von WasteWise zu GridCast ist transparent dokumentiert. Entscheidend
 
 Makro-nMAE gewichtet die drei Länder gleich. Die praktische Zielmarke lag bei mindestens fünf Prozent Verbesserung gegenüber der Kalender-Baseline.
 
-Quelle: notebooks/00_question_gridcast.ipynb und documents/QUA3CK/01-question/README.md.
+Quelle: notebooks/00_question_gridcast.ipynb.
 
 ## Folie 3
 
@@ -78,7 +78,7 @@ Methodisch wichtig: Der historische Backtest zeigt vorab berechnete C-Prognosen.
 
 Die Zukunftsansicht ist eine transparente Was-wäre-wenn-Rechnung und wird entsprechend beschriftet.
 
-Quelle: streamlit_app/app.py und documents/QUA3CK/05-knowledge-transfer/README.md.
+Quelle: streamlit_app/app.py und notebooks/04_knowledge_transfer.md.
 
 ## Folie 8
 
@@ -92,7 +92,7 @@ Das Beispielszenario erhöht die modellierte Spitzenlast um 10,24 Prozent. Es is
 
 Der Risikoindikator bezeichnet nur die Wahrscheinlichkeit einer historischen nationalen Quantilsüberschreitung, ausdrücklich nicht die Wahrscheinlichkeit eines Blackouts.
 
-Quelle: src/gridcast/scenario.py, src/gridcast/risk.py und reports/k/k_deployment.json.
+Quelle: src/gridcast/scenario.py, src/gridcast/risk.py und reports/k_deployment.json.
 
 ## Folie 9
 
@@ -102,9 +102,9 @@ Das finale Joblib-Artefakt ist rund 1,9 Megabyte groß, hat eine feste Prüfsumm
 
 Elf Funktionstests bestehen. Außerdem startet die App unter Streamlit 1.50 und Python 3.12; der Health-Endpunkt antwortet mit OK.
 
-Das Repository ist für Streamlit Community Cloud vorbereitet. Nur die einmalige Aktivierung im persönlichen Streamlit-Konto bleibt als externer Schritt.
+Das Community-Cloud-Deployment ist eingerichtet. Der erste Plattformstart lief allerdings unter Python 3.14.6 statt der lokal verifizierten Python-3.12-Umgebung und endete mit einem nativen Prozessabsturz. Die Laufzeitkonfiguration wird deshalb separat korrigiert.
 
-Quelle: reports/k/k_deployment.json, models/README.md und Streamlit Community Cloud Documentation.
+Quelle: reports/k_deployment.json und notebooks/04_knowledge_transfer.md.
 
 ## Folie 10
 

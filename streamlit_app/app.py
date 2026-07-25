@@ -30,7 +30,7 @@ CLIMATOLOGY_PATH = (
     PROJECT_ROOT / "data" / "app" / "weather_climatology_1980_2019.csv.gz"
 )
 RISK_PATH = PROJECT_ROOT / "data" / "app" / "risk_calibration_2018.npz"
-K_REPORT_PATH = PROJECT_ROOT / "reports" / "k" / "k_deployment.json"
+K_REPORT_PATH = PROJECT_ROOT / "reports" / "k_deployment.json"
 
 COUNTRY_LABELS = {
     code: f"{spec.name} ({code})" for code, spec in COUNTRY_REGISTRY.items()
