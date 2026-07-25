@@ -1,0 +1,36 @@
+{
+  "project": "GridCast Europe",
+  "phase": "A3",
+  "selected_on": "validation_2018",
+  "training_period": "2015-01-01/2017-12-31",
+  "validation_period": "2018-01-01/2018-12-31",
+  "test_period": "2019-01-01/2019-12-31",
+  "test_used_in_selection": false,
+  "countries": [
+    "DE",
+    "FR",
+    "PL"
+  ],
+  "primary_metric": "macro_nMAE",
+  "model_family": "HistGradientBoostingRegressor",
+  "target_scaling": "country_training_mean",
+  "feature_set": "calendar + national_holiday + weather",
+  "hyperparameters": {
+    "loss": "absolute_error",
+    "learning_rate": 0.1,
+    "max_leaf_nodes": 127,
+    "max_iter": 300,
+    "min_samples_leaf": 80,
+    "l2_regularization": 1.0,
+    "early_stopping": false,
+    "random_state": 42
+  },
+  "validation_metrics": {
+    "MAE_MW": 1384.2379209199298,
+    "RMSE_MW": 1897.9856522312218,
+    "macro_nMAE": 0.03307829673899517,
+    "sMAPE_pct": 3.3513721377804133,
+    "R2": 0.9902759402445735
+  },
+  "validation_improvement_vs_calendar_pct": 42.528584300950754
+}
