@@ -1,0 +1,77 @@
+{
+  "project": "GridCast Europe",
+  "phase": "C",
+  "evaluated_on": "test_2019",
+  "refit_period": "2015-01-01/2018-12-31",
+  "test_period": "2019-01-01/2019-12-31",
+  "selection_locked_before_test": true,
+  "test_used_for_reselection_or_tuning": false,
+  "a3_selection_sha256": "d60f71cd18bd27585f9b1cec17ec02d8c801d8dea75f32eabdc715e6e6178b2a",
+  "countries": [
+    "DE",
+    "FR",
+    "PL"
+  ],
+  "primary_metric": "macro_nMAE",
+  "selected_model": "HistGradientBoostingRegressor",
+  "selected_feature_set": "calendar + national_holiday + weather",
+  "selected_hyperparameters": {
+    "loss": "absolute_error",
+    "learning_rate": 0.1,
+    "max_leaf_nodes": 127,
+    "max_iter": 300,
+    "min_samples_leaf": 80,
+    "l2_regularization": 1.0,
+    "early_stopping": false,
+    "random_state": 42
+  },
+  "test_metrics": {
+    "MAE_MW": 1157.7766430620409,
+    "RMSE_MW": 1663.3628347101176,
+    "macro_nMAE": 0.027061483741119885,
+    "sMAPE_pct": 2.747434144939383,
+    "R2": 0.992272043555827
+  },
+  "test_metrics_by_country": {
+    "DE": {
+      "MAE_MW": 1396.5623867089241,
+      "RMSE_MW": 1920.3059241457522,
+      "nMAE": 0.024942952930356192,
+      "sMAPE_pct": 2.5718640914270283,
+      "R2": 0.9623151716520979
+    },
+    "FR": {
+      "MAE_MW": 1553.7292057603381,
+      "RMSE_MW": 2042.0706770283416,
+      "nMAE": 0.029105225553287123,
+      "sMAPE_pct": 2.876915232303281,
+      "R2": 0.9672273594120055
+    },
+    "PL": {
+      "MAE_MW": 523.2643370380353,
+      "RMSE_MW": 665.9588759331103,
+      "nMAE": 0.027136272739716336,
+      "sMAPE_pct": 2.793597015818071,
+      "R2": 0.9551104856978916
+    }
+  },
+  "test_improvement_vs_calendar_pct": 44.491881532900656,
+  "h3_confirmed": true,
+  "practical_5pct_target_reached": true,
+  "final_app_model": {
+    "training_period": "2015-01-01/2019-12-31",
+    "rows": 131441,
+    "artifact_path": "models/gridcast_final_2015_2019.joblib",
+    "artifact_versioned": false,
+    "artifact_size_bytes": 1939407,
+    "fit_seconds": 4.535178131998691,
+    "reload_verified": true,
+    "independent_test_metric": null
+  },
+  "environment": {
+    "python": "3.12.13",
+    "pandas": "2.2.3",
+    "scikit_learn": "1.8.0",
+    "joblib": "1.5.3"
+  }
+}
