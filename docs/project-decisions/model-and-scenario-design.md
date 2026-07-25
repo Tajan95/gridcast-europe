@@ -45,7 +45,7 @@ Alle Baseline-Werte werden ausschließlich aus dem Trainingszeitraum berechnet.
 ```math
 \widehat L^{\text{mean}}_{c,t}
 =
-\operatorname{mean}_{i \in \text{Train},\,c_i=c}(L_i)
+\mathrm{mean}_{i \in \text{Train},\,c_i=c}(L_i)
 ```
 
 Diese minimale Baseline sagt für jede Stunde eines Landes denselben Wert voraus.
@@ -55,7 +55,7 @@ Diese minimale Baseline sagt für jede Stunde eines Landes denselben Wert voraus
 ```math
 \widehat L^{\text{calendar}}_{c,t}
 =
-\operatorname{mean}
+\mathrm{mean}
 \left(
 L_i
 \mid
@@ -113,12 +113,12 @@ Für ein Zukunftsdatum sind Kalendermerkmale bekannt, das konkrete Wetter jedoch
 ```math
 W^{\text{typ}}_{c,t}
 =
-\operatorname{median}
+\mathrm{median}
 \left(
 W_i
 \mid
 c_i=c,\,
-\operatorname{Kalendergruppe}(i)=\operatorname{Kalendergruppe}(t)
+\mathrm{Kalendergruppe}(i)=\mathrm{Kalendergruppe}(t)
 \right)
 ```
 
