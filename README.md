@@ -15,8 +15,9 @@ Erweiterte Streamlit-Frage:
 ## Methodischer Kern
 
 - stündliche Beobachtungseinheit `Land × UTC-Stunde`
-- drei europäische Länder nach dokumentierter Vollständigkeitsprüfung
-- chronologischer Train-/Validierungs-/Test-Split; genaue Jahre nach Datenprüfung
+- Kernländer: Deutschland (`DE`), Frankreich (`FR`) und Polen (`PL`)
+- chronologischer Split: 2015–2017 Training, 2018 Validierung, 2019 Test
+- 131.441 nutzbare Länder-Stunden nach Entfernung von 31 fehlenden Zielwerten
 - Baseline-Modelle: länderspezifischer Mittelwert und Kalenderdurchschnitt
 - Vergleichsmodelle: lineare/regularisierte Regression und Gradient Boosting
 - Kernfeatures: Land, Kalenderzyklen und ausreichend vollständige Wettermerkmale
@@ -29,7 +30,7 @@ Erweiterte Streamlit-Frage:
 - Werktage, Wochenenden und optional Feiertage
 - Monate und Jahreszeiten
 - Temperatur und nichtlineare Temperaturwirkungen
-- optional direkte und diffuse Sonneneinstrahlung oder Bewölkung
+- direkte und diffuse horizontale Sonneneinstrahlung
 - historischer Zeittrend nur explorativ
 - langfristige Nachfrage- und Rechenzentrumsentwicklung als transparente Szenarioannahmen
 
@@ -41,6 +42,15 @@ Erweiterte Streamlit-Frage:
 Die zweite Ebene ist eine *Was-wäre-wenn*-Analyse. Sie wird nicht als konkrete Wettervorhersage oder autonome, kausale Lastprognose bis 2030 oder 2050 ausgegeben.
 
 Eine angezeigte 24-Stunden-Kurve beschreibt den ausgewählten Kalendertag. Sie ist kein festgelegter operativer Prognosehorizont.
+
+## Reproduzierbare Datenphase
+
+- [Ausführbares Import-/Merge-/EDA-Notebook](notebooks/01_data_import_merge_eda.ipynb)
+- [QUA³CK: U – Understanding the Data](documents/QUA3CK/02-understanding-the-data/README.md)
+- [Länder-Scope und modulare Erweiterbarkeit](docs/project-decisions/country-scope-and-extensibility.md)
+- [Reproduzierbarer OPSD-Download](scripts/download_opsd_data.py)
+
+Die Rohdaten werden lokal unter `data/raw/` abgelegt und nicht versioniert.
 
 ## Zentrale Dokumente
 
@@ -61,13 +71,14 @@ documents/QUA3CK/           Prüfungsdokumentation entlang der fünf Phasen
 models/                     gespeicherte Modellartefakte und Metadaten
 notebooks/                  Analyse- und Modellierungsnotebooks
 reports/                    Abbildungen und Präsentationsartefakte
+scripts/                    reproduzierbare Downloads und Hilfsschritte
 src/gridcast/               wiederverwendbarer Python-Code
 streamlit_app/              interaktive Anwendung
 tests/                      automatisierte Tests
 ```
 
-Große Daten- und Modelldateien werden nicht in Git versioniert. Download und Aufbereitung sollen reproduzierbar per Code erfolgen.
+Große Daten- und Modelldateien werden nicht in Git versioniert. Download und Aufbereitung sind reproduzierbar per Code umgesetzt.
 
 ## Status
 
-Aktueller Stand: **Scope festgelegt; Datenquellen verifiziert; reproduzierbarer Datenimport und Vollständigkeitsprüfung als nächster Schritt.**
+Aktueller Stand: **Scope und Datenquellen festgelegt; Import, Qualitätsprüfung, Zusammenführung, Feature Engineering und explorative Datenanalyse abgeschlossen. Nächster Schritt: leakage-freie Baselines und Regressionsmodelle.**
