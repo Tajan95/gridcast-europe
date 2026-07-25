@@ -1,6 +1,6 @@
 # Kandidatenkarte: Open Power System Data – Time Series
 
-**Status:** A – priorisierte Kernquelle  
+**Status:** A – verifizierte Kernquelle  
 **Rolle:** Zielvariable und historische Lastfeatures
 
 ## Anbieter und Zugriff
@@ -31,11 +31,12 @@
 - Beobachtungseinheit: `Land × UTC-Stunde`
 - Join mit OPSD Weather Data: ISO-Ländercode plus `utc_timestamp`
 
-## Erwartetes Volumen
+## Gemessenes Volumen
 
-- ein vollständiges Land über fünf Jahre: ungefähr 43.800 Stunden
-- drei vollständige Länder: ungefähr 131.400 Länder-Stunden vor Missingness und Lag-Verlusten
-- diese Werte sind rechnerische Größenordnungen, keine bereits gemessenen Zeilenzahlen
+- Modellfenster 2015–2019: 43.824 mögliche Stunden je Land
+- drei Kernländer: 131.472 mögliche Länder-Stunden
+- 31 fehlende Lastwerte: DE 0, FR 30, PL 1
+- nach Zielbereinigung: 131.441 nutzbare Länder-Stunden
 
 ## Risiken
 
@@ -51,14 +52,15 @@
 - Zeitprognose: sehr hoch
 - langfristige Szenarioanalyse: nur als historisches Referenzprofil
 
-## Nächster Verifikationstest
+## Abgeschlossene Verifikation
 
-1. `time_series_60min_singleindex.csv` reproduzierbar herunterladen.
-2. Für alle länderweiten Lastspalten Zeitraum, Missingness und längste zusammenhängende Sequenz messen.
-3. Drei Länder nur nach gemeinsamer Wetterabdeckung auswählen.
-4. Prüfen, ob 2015–2019 vollständig genug für den geplanten Split sind.
+1. `time_series_60min_singleindex.csv` selektiv und reproduzierbar eingelesen.
+2. UTC-Zeitachse ist sortiert, duplikatfrei und stündlich lückenlos.
+3. Nationale Zielspalten für DE, FR und PL eindeutig ausgewählt.
+4. Gemeinsame Wetterabdeckung 2015–2019 bestätigt.
+5. Fehlende Zielwerte werden ohne Imputation entfernt.
 
-## Vorläufiges Urteil
+## Urteil
 
-**Geeignet und verbindlich priorisiert.** Die konkrete Länderauswahl bleibt datenabhängig.
+**Geeignet und als Kernquelle bestätigt.** Verbindliche Kernländer sind DE, FR und PL.
 
