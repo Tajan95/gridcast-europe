@@ -49,6 +49,9 @@ Eine angezeigte 24-Stunden-Kurve beschreibt den ausgewählten Kalendertag. Sie i
 - [QUA³CK: Q – Question](documents/QUA3CK/01-question/README.md)
 - [Ausführbares Import-/Merge-/EDA-Notebook](notebooks/01_data_import_merge_eda.ipynb)
 - [QUA³CK: U – Understanding the Data](documents/QUA3CK/02-understanding-the-data/README.md)
+- [A³-Notebook: Baselines, Modelle und Hyperparameter](notebooks/02_a3_model_development.ipynb)
+- [QUA³CK: A³ – Model Development](documents/QUA3CK/03-a3-model-development/README.md)
+- [A³-Auswahlreport](reports/a3/a3_selection.json)
 - [Länder-Scope und modulare Erweiterbarkeit](docs/project-decisions/country-scope-and-extensibility.md)
 - [Reproduzierbarer OPSD-Download](scripts/download_opsd_data.py)
 
@@ -83,4 +86,4 @@ Große Daten- und Modelldateien werden nicht in Git versioniert. Download und Au
 
 ## Status
 
-Aktueller Stand: **Q- und U-Phase abgeschlossen; Fragestellung, Hypothesen, Datenimport, Qualitätsprüfung, Zusammenführung, Feature Engineering und explorative Datenanalyse dokumentiert. Nächster Schritt: A³ mit leakage-freien Baselines und Regressionsmodellen.**
+Aktueller Stand: **Q-, U- und A³-Phase abgeschlossen. Auf der Validierung 2018 erreicht das ausgewählte Histogram-Gradient-Boosting-Modell einen Makro-nMAE von 3,31 % und verbessert die Kalender-Baseline um 42,5 %. Das Testjahr 2019 ist weiterhin unangetastet. Nächster Schritt: C-Phase mit eingefrorener Konfiguration, Refit auf 2015–2018 und einmaliger Testauswertung auf 2019.**
