@@ -43,8 +43,10 @@ Die zweite Ebene ist eine *Was-wäre-wenn*-Analyse. Sie wird nicht als konkrete 
 
 Eine angezeigte 24-Stunden-Kurve beschreibt den ausgewählten Kalendertag. Sie ist kein festgelegter operativer Prognosehorizont.
 
-## Reproduzierbare Datenphase
+## QUA³CK-Notebooks und reproduzierbare Datenphase
 
+- [Q-Notebook: Fragestellung und Experimentdesign](notebooks/00_question_gridcast.ipynb)
+- [QUA³CK: Q – Question](documents/QUA3CK/01-question/README.md)
 - [Ausführbares Import-/Merge-/EDA-Notebook](notebooks/01_data_import_merge_eda.ipynb)
 - [QUA³CK: U – Understanding the Data](documents/QUA3CK/02-understanding-the-data/README.md)
 - [Länder-Scope und modulare Erweiterbarkeit](docs/project-decisions/country-scope-and-extensibility.md)
@@ -81,4 +83,4 @@ Große Daten- und Modelldateien werden nicht in Git versioniert. Download und Au
 
 ## Status
 
-Aktueller Stand: **Scope und Datenquellen festgelegt; Import, Qualitätsprüfung, Zusammenführung, Feature Engineering und explorative Datenanalyse abgeschlossen. Nächster Schritt: leakage-freie Baselines und Regressionsmodelle.**
+Aktueller Stand: **Q- und U-Phase abgeschlossen; Fragestellung, Hypothesen, Datenimport, Qualitätsprüfung, Zusammenführung, Feature Engineering und explorative Datenanalyse dokumentiert. Nächster Schritt: A³ mit leakage-freien Baselines und Regressionsmodellen.**
