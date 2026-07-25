@@ -22,7 +22,7 @@ Erweiterung:
 
 ## Scope-Leitplanken
 
-- Kernmodell: überwachte Regression der stündlichen Last für voraussichtlich drei europäische Länder.
+- Kernmodell: überwachte Regression der stündlichen Last für Deutschland (`DE`), Frankreich (`FR`) und Polen (`PL`).
 - Features: Land, Kalenderzyklen, Werktag/Wochenende, Saison, Temperatur und weitere ausreichend vollständige Wettermerkmale.
 - Last-Lags 24/48/168 Stunden sind nicht Bestandteil des Kernmodells und keine App-Eingaben.
 - Der historische Backtest und die langfristige Szenarioanalyse sind methodisch und sprachlich zu trennen.
@@ -44,7 +44,7 @@ Erweiterung:
 - Tatsächliches Reanalysewetter im Backtest ausdrücklich vom statistisch typischen Wetterprofil der Szenarioanalyse unterscheiden.
 - Ein historischer Zeittrend darf explorativ analysiert, aber nicht unkritisch bis 2030 oder 2050 extrapoliert werden.
 - UTC, lokale Zeit und Sommerzeit dokumentiert behandeln.
-- Länder erst nach gemessener Vollständigkeit und Joinbarkeit auswählen.
+- Kernländer DE, FR und PL sind nach gemessener Vollständigkeit und Joinbarkeit freigegeben; weitere Länder benötigen denselben Prüfprozess.
 - Modellgüte mit MAE, RMSE, normalisiertem MAE und Baseline-Verbesserung bewerten; R² nur ergänzend.
 - „Baseline-Modell“ und „Basisszenario“ sprachlich strikt trennen.
 - Eine dargestellte 24-Stunden-Tageskurve nicht mit einem 24-Stunden-Prognosehorizont verwechseln.
