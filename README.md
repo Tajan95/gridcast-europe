@@ -52,6 +52,9 @@ Eine angezeigte 24-Stunden-Kurve beschreibt den ausgewählten Kalendertag. Sie i
 - [A³-Notebook: Baselines, Modelle und Hyperparameter](notebooks/02_a3_model_development.ipynb)
 - [QUA³CK: A³ – Model Development](documents/QUA3CK/03-a3-model-development/README.md)
 - [A³-Auswahlreport](reports/a3/a3_selection.json)
+- [C-Notebook: Refit, Test 2019 und Schlussfolgerung](notebooks/03_conclude_compare.ipynb)
+- [QUA³CK: C – Conclude & Compare](documents/QUA3CK/04-conclude-and-compare/README.md)
+- [C-Abschlussreport](reports/c/c_conclusion.json)
 - [Länder-Scope und modulare Erweiterbarkeit](docs/project-decisions/country-scope-and-extensibility.md)
 - [Reproduzierbarer OPSD-Download](scripts/download_opsd_data.py)
 
@@ -86,4 +89,4 @@ Große Daten- und Modelldateien werden nicht in Git versioniert. Download und Au
 
 ## Status
 
-Aktueller Stand: **Q-, U- und A³-Phase abgeschlossen. Auf der Validierung 2018 erreicht das ausgewählte Histogram-Gradient-Boosting-Modell einen Makro-nMAE von 3,31 % und verbessert die Kalender-Baseline um 42,5 %. Das Testjahr 2019 ist weiterhin unangetastet. Nächster Schritt: C-Phase mit eingefrorener Konfiguration, Refit auf 2015–2018 und einmaliger Testauswertung auf 2019.**
+Aktueller Stand: **Q-, U-, A³- und C-Phase abgeschlossen. Auf dem unangetasteten Testjahr 2019 erreicht das ausgewählte Histogram-Gradient-Boosting-Modell nach Refit auf 2015–2018 einen Makro-nMAE von 2,71 % und verbessert die Kalender-Baseline um 44,5 %. H3 und das praktische 5-%-Ziel sind bestätigt. Das finale App-Modell wurde anschließend mit unveränderter Konfiguration auf 2015–2019 trainiert und lokal verifiziert. Nächster Schritt: K-Phase mit Streamlit-App, Szenariologik, Handout und Präsentation.**
