@@ -1,6 +1,6 @@
 # Modell-, Baseline- und Szenariodesign
 
-**Stand:** 23.07.2026
+**Stand:** 25.07.2026
 
 ## Baseline-Modell und Basisszenario sind verschieden
 
@@ -85,7 +85,7 @@ Der Datensatz wird chronologisch geteilt:
 2. **Validierung:** Features, Hyperparameter und Modellklasse werden gewählt.
 3. **Test:** Das endgültige Modell wird einmalig auf einem vollständig späteren, unangetasteten Zeitraum bewertet.
 
-Der konkrete Split wird nach der Datenqualitätsprüfung festgelegt. Ein mögliches Schema ist 2015–2017 Training, 2018 Validierung und 2019 Test.
+Nach der Datenqualitätsprüfung ist der Split verbindlich festgelegt: 2015–2017 Training, 2018 Validierung und 2019 Test.
 
 ### Was der Backtest simuliert
 
