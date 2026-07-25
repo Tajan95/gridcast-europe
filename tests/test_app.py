@@ -16,6 +16,6 @@ def test_streamlit_app_and_deployment_assets_exist():
         "data/app/backtest_2019.csv.gz",
         "data/app/weather_climatology_1980_2019.csv.gz",
         "data/app/risk_calibration_2018.npz",
-        "reports/k/k_deployment.json",
+        "reports/k_deployment.json",
     ]:
         assert (PROJECT_ROOT / relative_path).is_file()
