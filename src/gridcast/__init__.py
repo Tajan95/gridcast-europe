@@ -16,13 +16,30 @@ from .risk import (
     extreme_day_probability,
     historical_quantile,
 )
+from .modeling import (
+    CalendarBaseline,
+    CountryMeanBaseline,
+    CountryScaledRegressor,
+    add_modeling_features,
+    make_hgb_estimator,
+    make_ridge_estimator,
+    national_holidays,
+    regression_metrics,
+    regression_metrics_by_country,
+    relative_improvement,
+    smape,
+)
 from .scenario import apply_structural_scenario
 
 __all__ = [
     "CORE_COUNTRIES",
     "COUNTRY_REGISTRY",
     "CountrySpec",
+    "CalendarBaseline",
+    "CountryMeanBaseline",
+    "CountryScaledRegressor",
     "add_calendar_features",
+    "add_modeling_features",
     "assign_split",
     "build_climatology",
     "build_model_table",
@@ -35,4 +52,11 @@ __all__ = [
     "empirical_extreme_probabilities",
     "extreme_day_probability",
     "historical_quantile",
+    "make_hgb_estimator",
+    "make_ridge_estimator",
+    "national_holidays",
+    "regression_metrics",
+    "regression_metrics_by_country",
+    "relative_improvement",
+    "smape",
 ]
