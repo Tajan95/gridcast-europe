@@ -13,6 +13,11 @@ def test_streamlit_app_and_deployment_assets_exist():
     assert "Zukunftsszenario" in source
     assert "EUROPE_TOPOJSON_URL" in source
     assert "Kombinierter Stresstest" in source
+    assert "Direkte Sonneneinstrahlung" in source
+    assert "Diffuse Sonneneinstrahlung" in source
+    assert "Wetterinputs" in source
+    assert "Direkte ML-Eingaben" in source
+    assert "Explizite Strukturannahmen" in source
     assert "value=0.99" in source
     assert "Technischer Deployment- und Reproduzierbarkeitsstatus" in source
     for relative_path in [

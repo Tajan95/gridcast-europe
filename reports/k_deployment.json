@@ -2,7 +2,7 @@
   "project": "GridCast Europe",
   "phase": "K",
   "status": "deployment_ready",
-  "created_on": "2026-07-25",
+  "created_on": "2026-07-26",
   "model": {
     "path": "models/gridcast_final_2015_2019.joblib",
     "size_bytes": 1939407,
@@ -60,6 +60,8 @@
     "country": "DE",
     "date": "2030-01-15",
     "temperature_delta_c": 2.0,
+    "direct_radiation_factor": 1.6,
+    "diffuse_radiation_factor": 0.7,
     "demand_change_pct": 10.0,
     "additional_data_centre_load_mw": 500.0,
     "base_peak_mw": 75014.25467364112,
@@ -67,7 +69,7 @@
     "peak_delta_mw": 7678.740301601705,
     "peak_delta_pct": 10.236374853031633,
     "base_energy_mwh": 1593996.7596844886,
-    "scenario_energy_mwh": 1757736.2085696268
+    "scenario_energy_mwh": 1752144.345682994
   },
   "app_assets": {
     "data/app/backtest_2019.csv.gz": {
@@ -93,7 +95,9 @@
         "24 Szenariostunden vorhergesagt",
         "keine nicht-endlichen Prognosen",
         "Risiko-Residualpfade länderweise vollständig",
-        "11 Modell-, Szenario-, Risiko- und App-Strukturtests bestanden",
+        "12 Modell-, Szenario-, Risiko- und App-Strukturtests bestanden",
+        "alle vier Streamlit-Ansichten ohne Ausnahme ausgeführt",
+        "Wetter-Preset aktualisiert Temperatur und Strahlungsprofile",
         "Streamlit 1.50.0 unter Python 3.12 gestartet",
         "Streamlit-Health-Endpunkt antwortet mit ok"
       ]

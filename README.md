@@ -20,8 +20,8 @@ historischen Backtest mit einer klar getrennten Zukunftsszenarioanalyse.
 > prognostizieren?
 
 Die Streamlit-Erweiterung untersucht zusätzlich, wie sich ein historisch
-abgeleitetes Lastprofil unter expliziten Temperatur-, Nachfrage- und
-Rechenzentrumsannahmen verändert.
+abgeleitetes Lastprofil unter veränderten Temperatur- und Strahlungsprofilen
+sowie expliziten Nachfrage- und Rechenzentrumsannahmen verändert.
 
 ## Kernergebnisse
 
@@ -45,8 +45,8 @@ einmalig auf 2019 getestet.
    aus dem unangetasteten Testjahr 2019; direkter Vergleich von HGB,
    Kalender-Baseline und Istwert.
 2. **Konditionales Zukunftsszenario:** typisches Wetterprofil aus 1980–2019,
-   frei gewählte Temperaturabweichung sowie transparente Nachfrage- und
-   Rechenzentrumseffekte.
+   frei gewählte Temperaturabweichung, direkte und diffuse Strahlung sowie
+   transparente Nachfrage- und Rechenzentrumseffekte.
 
 Die zweite Ebene ist eine Was-wäre-wenn-Rechnung, keine konkrete
 Wettervorhersage oder autonome Langfristprognose. Der explorative
@@ -87,9 +87,10 @@ streamlit run streamlit_app/app.py
 ```
 
 Die App umfasst eine interaktive Europakarte, einen historischen Backtest mit
-Hoverwerten, fünf illustrative Szenario-Presets, manuelle Annahmen,
-Zukunftsvergleichswerte sowie Methodik und Grenzen. Für die Inferenz wird
-ausschließlich das verifizierte Modell
+Hoverwerten, sieben illustrative Szenario-Presets, ein Wetter-Cockpit mit drei
+direkten ML-Eingaben, klar getrennte Strukturannahmen, visualisierte
+Wetterprofile, Zukunftsvergleichswerte sowie Methodik und Grenzen. Für die
+Inferenz wird ausschließlich das verifizierte Modell
 [`models/gridcast_final_2015_2019.joblib`](models/gridcast_final_2015_2019.joblib)
 verwendet.
 

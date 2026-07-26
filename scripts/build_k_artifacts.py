@@ -278,6 +278,8 @@ def main() -> None:
         country="DE",
         target_date="2030-01-15",
         temperature_delta_c=2.0,
+        direct_radiation_factor=1.6,
+        diffuse_radiation_factor=0.7,
         demand_change_fraction=0.10,
         additional_data_centre_load_mw=500.0,
     )
@@ -306,7 +308,7 @@ def main() -> None:
         "project": "GridCast Europe",
         "phase": "K",
         "status": "deployment_ready",
-        "created_on": "2026-07-25",
+        "created_on": "2026-07-26",
         "model": {
             "path": str(FINAL_MODEL_PATH.relative_to(PROJECT_ROOT)),
             "size_bytes": FINAL_MODEL_PATH.stat().st_size,
@@ -330,6 +332,8 @@ def main() -> None:
             "country": "DE",
             "date": "2030-01-15",
             "temperature_delta_c": 2.0,
+            "direct_radiation_factor": 1.6,
+            "diffuse_radiation_factor": 0.7,
             "demand_change_pct": 10.0,
             "additional_data_centre_load_mw": 500.0,
             **scenario_summary,
@@ -342,6 +346,11 @@ def main() -> None:
                 "24 Szenariostunden vorhergesagt",
                 "keine nicht-endlichen Prognosen",
                 "Risiko-Residualpfade länderweise vollständig",
+                "12 Modell-, Szenario-, Risiko- und App-Strukturtests bestanden",
+                "alle vier Streamlit-Ansichten ohne Ausnahme ausgeführt",
+                "Wetter-Preset aktualisiert Temperatur und Strahlungsprofile",
+                "Streamlit 1.50.0 unter Python 3.12 gestartet",
+                "Streamlit-Health-Endpunkt antwortet mit ok",
             ]
         },
     }

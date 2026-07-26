@@ -76,7 +76,7 @@ Die K-Phase überführt das Projekt in eine Streamlit-Anwendung mit vier klar ge
 
 Methodisch wichtig: Der historische Backtest zeigt vorab berechnete C-Prognosen. Das später auf 2015 bis 2019 refittete App-Modell wird nicht verwendet, um 2019 rückwirkend besser aussehen zu lassen.
 
-Die Übersicht nutzt eine interaktive Europakarte. Im Backtest sind Istwert, HGB und die gestrichelte Kalender-Baseline mit exakten Hoverwerten vergleichbar. Die Zukunftsansicht bietet fünf Presets und bleibt als transparente Was-wäre-wenn-Rechnung beschriftet.
+Die Übersicht nutzt eine interaktive Europakarte. Im Backtest sind Istwert, HGB und die gestrichelte Kalender-Baseline mit exakten Hoverwerten vergleichbar. Die Zukunftsansicht bietet sieben Presets und trennt direkte ML-Eingaben, Strukturannahmen und Auswertung sichtbar voneinander.
 
 Quelle: streamlit_app/app.py und notebooks/04_knowledge_transfer.md.
 
@@ -84,13 +84,13 @@ Quelle: streamlit_app/app.py und notebooks/04_knowledge_transfer.md.
 
 Zeit: ca. 90 Sekunden.
 
-Für ein gewähltes Datum werden Kalenderfeatures und ein typisches Wetterprofil aus der Klimatologie 1980 bis 2019 erzeugt. Die Temperaturabweichung wirkt vor der ML-Inferenz.
+Für ein gewähltes Datum werden Kalenderfeatures und ein typisches Wetterprofil aus der Klimatologie 1980 bis 2019 erzeugt. Temperaturabweichung sowie direkte und diffuse Sonneneinstrahlung verändern die Feature-Matrix vor einer erneuten ML-Inferenz.
 
 Nachfrageänderung und zusätzliche Rechenzentrumslast werden danach als explizite Strukturannahmen angewendet.
 
 Das Beispielszenario erhöht die modellierte Spitzenlast um 10,24 Prozent. Es ist keine konkrete Prognose für 2030.
 
-Die fünf Presets sind illustrative Einstiegspunkte. Zusätzlich zeigt die App Tagesenergie, Spitzenzeit und Stunden oberhalb der historischen Quantilschwelle; alle Annahmen bleiben manuell veränderbar.
+Die sieben Presets sind illustrative Einstiegspunkte. Ein eigener Wetterinputs-Tab stellt das typische und das tatsächlich an das HGB übergebene Temperatur- und Strahlungsprofil gegenüber. Zusätzlich zeigt die App Tagesenergie, Spitzenzeit und Stunden oberhalb der historischen Quantilschwelle; alle Annahmen bleiben manuell veränderbar.
 
 Der Risikoindikator bezeichnet nur die Wahrscheinlichkeit einer historischen nationalen Quantilsüberschreitung, ausdrücklich nicht die Wahrscheinlichkeit eines Blackouts.
 
@@ -102,7 +102,7 @@ Zeit: ca. 60 Sekunden.
 
 Das finale Joblib-Artefakt ist rund 1,9 Megabyte groß, hat eine feste Prüfsumme und liegt im Repository.
 
-Elf Funktionstests bestehen. Zusätzlich laufen alle vier App-Ansichten und die Preset-Neuberechnung ohne Ausnahme.
+Zwölf Funktionstests bestehen. Zusätzlich laufen alle vier App-Ansichten und die Wetter-Preset-Neuberechnung ohne Ausnahme.
 
 Das Community-Cloud-Deployment läuft stabil unter Python 3.12.13. Durch die Trennung von App- und Entwicklungsabhängigkeiten sank die Cloud-Umgebung von 129 auf 41 Pakete; der frühere native Absturz unter Python 3.14.6 tritt damit nicht mehr auf.
 
