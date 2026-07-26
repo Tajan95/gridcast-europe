@@ -19,15 +19,25 @@ def test_streamlit_app_and_deployment_assets_exist():
     assert "Wetterinputs" in source
     assert "Direkte ML-Eingaben" in source
     assert "Explizite Strukturannahmen" in source
-    assert 'st.button(\n                    "Q95"' in source
-    assert 'st.button(\n                    "Q99"' in source
+    assert '"Q95",' in source
+    assert '"Q99",' in source
     assert 'st.session_state.setdefault("scenario_quantile", 0.99)' in source
     assert '"Mittlere Last (MW)"' in source
     assert '"Stundendaten und exakte Fehlerwerte", expanded=True' in source
     assert "EXPECTED_SCENARIO_API_VERSION = 2" in source
     assert "padding-top: 4.5rem" in source
-    assert 'st.columns([0.82, 1.68], gap="large")' in source
+    assert "max-width: 1680px" in source
+    assert 'st.columns([0.95, 1.55], gap="large")' in source
+    assert 'control_col.container(key="scenario_controls")' in source
     assert 'result_col.container(key="scenario_results")' in source
+    assert 'st.container(border=True, key="scenario_presets")' in source
+    assert "range(0, len(preset_items), 4)" in source
+    assert "preset['button_label']" in source
+    assert "identity_col, date_col = st.columns(2" in source
+    assert "temp_col, direct_col, diffuse_col = st.columns(3" in source
+    assert "assumption_col, evaluation_col = st.columns(2" in source
+    assert "result_panel.columns(4" in source
+    assert ".st-key-scenario_controls" in source
     assert ".st-key-scenario_results" in source
     assert "format_power_mw" in source
     assert "format_energy_mwh" in source

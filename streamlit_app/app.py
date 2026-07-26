@@ -57,6 +57,7 @@ NAVIGATION = [
 SCENARIO_PRESETS = {
     "Historische Referenz": {
         "icon": "◉",
+        "button_label": "Referenz",
         "temperature_delta": 0.0,
         "direct_radiation_pct": 100,
         "diffuse_radiation_pct": 100,
@@ -66,6 +67,7 @@ SCENARIO_PRESETS = {
     },
     "Kalter Wintertag": {
         "icon": "❄",
+        "button_label": "Kalter Tag",
         "temperature_delta": -4.0,
         "direct_radiation_pct": 100,
         "diffuse_radiation_pct": 100,
@@ -75,6 +77,7 @@ SCENARIO_PRESETS = {
     },
     "Sonniger Tag": {
         "icon": "☀",
+        "button_label": "Sonniger Tag",
         "temperature_delta": 2.0,
         "direct_radiation_pct": 160,
         "diffuse_radiation_pct": 70,
@@ -87,6 +90,7 @@ SCENARIO_PRESETS = {
     },
     "Bewölkter Tag": {
         "icon": "☁",
+        "button_label": "Bewölkter Tag",
         "temperature_delta": -1.0,
         "direct_radiation_pct": 35,
         "diffuse_radiation_pct": 140,
@@ -99,6 +103,7 @@ SCENARIO_PRESETS = {
     },
     "Elektrifizierung": {
         "icon": "↗",
+        "button_label": "Elektrifizierung",
         "temperature_delta": 0.0,
         "direct_radiation_pct": 100,
         "diffuse_radiation_pct": 100,
@@ -108,6 +113,7 @@ SCENARIO_PRESETS = {
     },
     "Rechenzentrumsboom": {
         "icon": "▦",
+        "button_label": "Rechenzentren",
         "temperature_delta": 0.0,
         "direct_radiation_pct": 100,
         "diffuse_radiation_pct": 100,
@@ -117,6 +123,7 @@ SCENARIO_PRESETS = {
     },
     "Kombinierter Stresstest": {
         "icon": "⚠",
+        "button_label": "Kombiniert",
         "temperature_delta": -3.0,
         "direct_radiation_pct": 50,
         "diffuse_radiation_pct": 130,
@@ -169,8 +176,10 @@ def apply_visual_theme() -> None:
         }
 
         [data-testid="stMainBlockContainer"] {
-            max-width: 1320px;
+            max-width: 1680px;
             padding-top: 4.5rem;
+            padding-left: 1.6rem;
+            padding-right: 1.6rem;
             padding-bottom: 4rem;
         }
 
@@ -304,6 +313,83 @@ def apply_visual_theme() -> None:
             position: sticky;
             top: 4.75rem;
             z-index: 2;
+        }
+
+        .st-key-scenario_controls [data-testid="stVerticalBlock"] {
+            gap: 0.62rem;
+        }
+
+        .st-key-scenario_controls [data-testid="stVerticalBlockBorderWrapper"] {
+            padding: 0.72rem 0.82rem;
+            border-radius: 0.8rem;
+        }
+
+        .st-key-scenario_controls h3 {
+            margin: 0;
+            padding: 0;
+            font-size: 1.35rem;
+        }
+
+        .st-key-scenario_controls h4 {
+            margin: 0;
+            padding: 0;
+            font-size: 1.02rem;
+        }
+
+        .st-key-scenario_controls [data-testid="stCaptionContainer"] p {
+            font-size: 0.76rem;
+            line-height: 1.3;
+        }
+
+        .st-key-scenario_controls [data-testid="stWidgetLabel"] p {
+            font-size: 0.82rem;
+            line-height: 1.25;
+        }
+
+        .st-key-scenario_presets button {
+            min-height: 2.45rem;
+            padding: 0.3rem 0.38rem;
+        }
+
+        .st-key-scenario_presets button p {
+            font-size: 0.77rem;
+            line-height: 1.15;
+        }
+
+        .st-key-scenario_presets [data-testid="stAlert"] {
+            padding: 0.55rem 0.68rem;
+        }
+
+        .st-key-scenario_presets [data-testid="stAlert"] p {
+            font-size: 0.78rem;
+            line-height: 1.3;
+        }
+
+        .st-key-scenario_results h3 {
+            margin: 0 0 0.25rem;
+            padding: 0;
+            font-size: 1.35rem;
+        }
+
+        .st-key-scenario_results [data-testid="stMetric"] {
+            min-height: 0;
+            padding: 0.62rem 0.72rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 16px rgba(16, 42, 67, 0.05);
+        }
+
+        .st-key-scenario_results [data-testid="stMetricLabel"] p {
+            font-size: 0.76rem;
+            line-height: 1.2;
+        }
+
+        .st-key-scenario_results [data-testid="stMetricValue"] {
+            font-size: 1.62rem;
+            line-height: 1.2;
+        }
+
+        .st-key-scenario_results [data-testid="stMetricDelta"] {
+            font-size: 0.72rem;
         }
 
         h1, h2, h3 {
@@ -1231,147 +1317,163 @@ def render_scenario() -> None:
 
     workspace = st.container(key="scenario_workspace")
     with workspace:
-        control_col, result_col = st.columns([0.82, 1.68], gap="large")
+        control_col, result_col = st.columns([0.95, 1.55], gap="large")
+    control_panel = control_col.container(key="scenario_controls")
     result_panel = result_col.container(key="scenario_results")
 
-    with control_col:
+    with control_panel:
         st.markdown("### Szenario konfigurieren")
-        st.markdown("#### Vordefinierte Stressannahmen")
-        st.caption(
-            "Preset wählen und die Annahmen anschließend manuell feinjustieren."
-        )
-        preset_items = list(SCENARIO_PRESETS.items())
-        for row_start in range(0, len(preset_items), 2):
-            preset_columns = st.columns(2, gap="small")
-            for column, (index, (name, preset)) in zip(
-                preset_columns,
-                enumerate(preset_items[row_start : row_start + 2], row_start),
-            ):
-                with column:
-                    st.button(
-                        f"{preset['icon']} {name}",
-                        key=f"scenario_preset_{index}",
-                        type=(
-                            "primary"
-                            if st.session_state["scenario_preset"] == name
-                            else "secondary"
-                        ),
-                        width="stretch",
-                        on_click=apply_scenario_preset,
-                        args=(name,),
-                    )
-        active_preset = SCENARIO_PRESETS[st.session_state["scenario_preset"]]
-        st.info(active_preset["description"], icon="💡")
+        with st.container(border=True, key="scenario_presets"):
+            st.markdown("#### Vordefinierte Stressannahmen")
+            st.caption(
+                "Preset wählen und die Annahmen anschließend feinjustieren."
+            )
+            preset_items = list(SCENARIO_PRESETS.items())
+            for row_start in range(0, len(preset_items), 4):
+                preset_columns = st.columns(4, gap="small")
+                for column, (index, (name, preset)) in zip(
+                    preset_columns,
+                    enumerate(
+                        preset_items[row_start : row_start + 4],
+                        row_start,
+                    ),
+                ):
+                    with column:
+                        st.button(
+                            f"{preset['icon']} {preset['button_label']}",
+                            key=f"scenario_preset_{index}",
+                            type=(
+                                "primary"
+                                if st.session_state["scenario_preset"] == name
+                                else "secondary"
+                            ),
+                            width="stretch",
+                            on_click=apply_scenario_preset,
+                            args=(name,),
+                        )
+            active_preset = SCENARIO_PRESETS[
+                st.session_state["scenario_preset"]
+            ]
+            st.info(active_preset["description"], icon="💡")
 
-        with st.container(border=True):
+        with st.container(border=True, key="scenario_ml_inputs"):
             st.markdown("#### 1 · Direkte ML-Eingaben")
             st.caption(
                 "Land, Datum und Wetter bauen die Feature-Matrix neu auf und "
                 "lösen eine HGB-Inferenz aus."
             )
-            country = st.radio(
-                "Land",
-                options=list(COUNTRY_REGISTRY),
-                format_func=lambda code: COUNTRY_SHORT_LABELS[code],
-                key="scenario_country",
-                horizontal=True,
-            )
-            target_date = st.date_input(
-                "Szenariodatum",
-                value=date(2030, 1, 15),
-                min_value=date(2020, 1, 1),
-                max_value=date(2050, 12, 31),
-                key="scenario_date",
-            )
-            temperature_delta = st.slider(
-                "Temperaturabweichung (°C)",
-                min_value=-5.0,
-                max_value=5.0,
-                step=0.5,
-                key="scenario_temperature_delta",
-                help="Abweichung vom historischen Medianprofil des Monats.",
-            )
-            direct_radiation_pct = st.slider(
-                "Direkte Sonneneinstrahlung",
-                min_value=0,
-                max_value=200,
-                step=5,
-                key="scenario_direct_radiation_pct",
-                format="%d %%",
-                help=(
-                    "Anteil des typischen direkten Strahlungsprofils. "
-                    "100 % entspricht dem historischen Monatsmedian."
-                ),
-            )
-            diffuse_radiation_pct = st.slider(
-                "Diffuse Sonneneinstrahlung",
-                min_value=0,
-                max_value=200,
-                step=5,
-                key="scenario_diffuse_radiation_pct",
-                format="%d %%",
-                help=(
-                    "Anteil des typischen diffusen Strahlungsprofils. "
-                    "100 % entspricht dem historischen Monatsmedian."
-                ),
-            )
-
-        with st.container(border=True):
-            st.markdown("#### 2 · Explizite Strukturannahmen")
-            st.caption(
-                "Nicht gelernt: Diese Werte werden nach der ML-Inferenz "
-                "transparent angewendet."
-            )
-            demand_change_pct = st.slider(
-                "Nachfrageänderung (%)",
-                min_value=-20,
-                max_value=50,
-                step=1,
-                key="scenario_demand_change",
-                help="Transparenter Strukturaufschlag nach der ML-Inferenz.",
-            )
-            data_centre_mw = st.slider(
-                "Rechenzentrumslast (MW)",
-                min_value=0,
-                max_value=5_000,
-                step=100,
-                key="scenario_data_centre_mw",
-                help="Zusätzliche konstante Last in jeder Szenariostunde.",
-            )
-
-        with st.container(border=True):
-            st.markdown("#### 3 · Auswertung")
-            st.caption(
-                "Die Schwelle verändert nur die Einordnung, nicht die Lastkurve."
-            )
-            st.markdown("**Extremzustandsschwelle**")
-            q95_col, q99_col = st.columns(2, gap="small")
-            quantile = float(st.session_state["scenario_quantile"])
-            with q95_col:
-                st.button(
-                    "Q95",
-                    key="scenario_quantile_q95",
-                    type="primary" if quantile == 0.95 else "secondary",
-                    width="stretch",
-                    on_click=set_scenario_quantile,
-                    args=(0.95,),
-                    help="95-%-Quantil der historischen Last 2015–2017.",
+            identity_col, date_col = st.columns(2, gap="small")
+            with identity_col:
+                country = st.radio(
+                    "Land",
+                    options=list(COUNTRY_REGISTRY),
+                    format_func=lambda code: code,
+                    key="scenario_country",
+                    horizontal=True,
+                    help="DE = Deutschland, FR = Frankreich, PL = Polen.",
                 )
-            with q99_col:
-                st.button(
-                    "Q99",
-                    key="scenario_quantile_q99",
-                    type="primary" if quantile == 0.99 else "secondary",
-                    width="stretch",
-                    on_click=set_scenario_quantile,
-                    args=(0.99,),
-                    help="99-%-Quantil der historischen Last 2015–2017.",
+            with date_col:
+                target_date = st.date_input(
+                    "Szenariodatum",
+                    value=date(2030, 1, 15),
+                    min_value=date(2020, 1, 1),
+                    max_value=date(2050, 12, 31),
+                    key="scenario_date",
                 )
-            st.caption(
-                "Verglichen wird mit einer historischen nationalen "
-                "Lastschwelle aus 2015–2017; die Unsicherheit stammt aus "
-                "Residualtagen der Validierung 2018."
-            )
+            temp_col, direct_col, diffuse_col = st.columns(3, gap="small")
+            with temp_col:
+                temperature_delta = st.slider(
+                    "Temperaturabweichung (°C)",
+                    min_value=-5.0,
+                    max_value=5.0,
+                    step=0.5,
+                    key="scenario_temperature_delta",
+                    help="Abweichung vom historischen Monatsmedian.",
+                )
+            with direct_col:
+                direct_radiation_pct = st.slider(
+                    "Direkte Sonneneinstrahlung",
+                    min_value=0,
+                    max_value=200,
+                    step=5,
+                    key="scenario_direct_radiation_pct",
+                    format="%d %%",
+                    help=(
+                        "Anteil des typischen direkten Strahlungsprofils; "
+                        "100 % entspricht dem historischen Monatsmedian."
+                    ),
+                )
+            with diffuse_col:
+                diffuse_radiation_pct = st.slider(
+                    "Diffuse Sonneneinstrahlung",
+                    min_value=0,
+                    max_value=200,
+                    step=5,
+                    key="scenario_diffuse_radiation_pct",
+                    format="%d %%",
+                    help=(
+                        "Anteil des typischen diffusen Strahlungsprofils; "
+                        "100 % entspricht dem historischen Monatsmedian."
+                    ),
+                )
+
+        assumption_col, evaluation_col = st.columns(2, gap="small")
+        with assumption_col:
+            with st.container(border=True, key="scenario_structure_inputs"):
+                st.markdown("#### 2 · Explizite Strukturannahmen")
+                st.caption(
+                    "Nicht gelernt: nach der ML-Inferenz transparent angewendet."
+                )
+                demand_change_pct = st.slider(
+                    "Nachfrageänderung (%)",
+                    min_value=-20,
+                    max_value=50,
+                    step=1,
+                    key="scenario_demand_change",
+                    help="Transparenter Strukturaufschlag nach der ML-Inferenz.",
+                )
+                data_centre_mw = st.slider(
+                    "Rechenzentrumslast (MW)",
+                    min_value=0,
+                    max_value=5_000,
+                    step=100,
+                    key="scenario_data_centre_mw",
+                    help="Zusätzliche konstante Last in jeder Szenariostunde.",
+                )
+
+        with evaluation_col:
+            with st.container(border=True, key="scenario_evaluation"):
+                st.markdown("#### 3 · Auswertung")
+                st.caption(
+                    "Die Schwelle verändert nur die Einordnung der Lastkurve."
+                )
+                st.markdown("**Extremzustandsschwelle**")
+                q95_col, q99_col = st.columns(2, gap="small")
+                quantile = float(st.session_state["scenario_quantile"])
+                with q95_col:
+                    st.button(
+                        "Q95",
+                        key="scenario_quantile_q95",
+                        type="primary" if quantile == 0.95 else "secondary",
+                        width="stretch",
+                        on_click=set_scenario_quantile,
+                        args=(0.95,),
+                        help="95-%-Quantil der historischen Last 2015–2017.",
+                    )
+                with q99_col:
+                    st.button(
+                        "Q99",
+                        key="scenario_quantile_q99",
+                        type="primary" if quantile == 0.99 else "secondary",
+                        width="stretch",
+                        on_click=set_scenario_quantile,
+                        args=(0.99,),
+                        help="99-%-Quantil der historischen Last 2015–2017.",
+                    )
+                st.caption(
+                    "Historische nationale Lastschwelle 2015–2017; "
+                    "Unsicherheit aus Residualtagen der Validierung 2018."
+                )
 
     model = load_model()
     climatology = load_climatology()
@@ -1427,7 +1529,7 @@ def render_scenario() -> None:
     )
 
     result_panel.markdown("### Ergebnis gegenüber der historischen Referenz")
-    col1, col2 = result_panel.columns(2)
+    col1, col2, col3, col4 = result_panel.columns(4, gap="small")
     col1.metric(
         "Szenario-Lastspitze",
         format_power_mw(summary["scenario_peak_mw"]),
@@ -1441,7 +1543,6 @@ def render_scenario() -> None:
             f"{format_pct(energy_delta_pct, 1)}"
         ),
     )
-    col3, col4 = result_panel.columns(2)
     col3.metric(
         "Zeitpunkt der Spitze",
         format_hour(scenario_peak_hour),
