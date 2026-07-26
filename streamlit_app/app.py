@@ -176,7 +176,7 @@ def apply_visual_theme() -> None:
         }
 
         [data-testid="stMainBlockContainer"] {
-            max-width: 1680px;
+            max-width: 1320px;
             padding-top: 4.5rem;
             padding-left: 1.6rem;
             padding-right: 1.6rem;
@@ -336,6 +336,11 @@ def apply_visual_theme() -> None:
             font-size: 1.02rem;
         }
 
+        .st-key-scenario_controls
+        [data-testid="stMarkdownContainer"]:has(h4) {
+            padding-bottom: 0.28rem;
+        }
+
         .st-key-scenario_controls [data-testid="stCaptionContainer"] p {
             font-size: 0.76rem;
             line-height: 1.3;
@@ -409,6 +414,21 @@ def apply_visual_theme() -> None:
             .st-key-scenario_results {
                 position: static;
             }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def apply_scenario_page_width() -> None:
+    """Nutzt nur für die informationsreiche Szenarioseite mehr Breite."""
+
+    st.markdown(
+        """
+        <style>
+        [data-testid="stMainBlockContainer"] {
+            max-width: 1680px;
         }
         </style>
         """,
@@ -1289,7 +1309,11 @@ def build_radiation_input_chart(scenario: pd.DataFrame) -> alt.Chart:
                     domain=["Typisches Profil", "Gewähltes Wetter"],
                     range=[[7, 4], [1, 0]],
                 ),
-                legend=alt.Legend(orient="top", direction="horizontal"),
+                legend=alt.Legend(
+                    orient="bottom",
+                    direction="horizontal",
+                    columns=2,
+                ),
             ),
             tooltip=[
                 alt.Tooltip("local_hour:Q", title="Lokale Stunde"),
@@ -1307,6 +1331,7 @@ def build_radiation_input_chart(scenario: pd.DataFrame) -> alt.Chart:
 
 
 def render_scenario() -> None:
+    apply_scenario_page_width()
     render_page_header(
         "K · Knowledge Transfer",
         "Konditionales Zukunftsszenario",
@@ -1419,7 +1444,11 @@ def render_scenario() -> None:
 
         assumption_col, evaluation_col = st.columns(2, gap="small")
         with assumption_col:
-            with st.container(border=True, key="scenario_structure_inputs"):
+            with st.container(
+                border=True,
+                key="scenario_structure_inputs",
+                height="stretch",
+            ):
                 st.markdown("#### 2 · Explizite Strukturannahmen")
                 st.caption(
                     "Nicht gelernt: nach der ML-Inferenz transparent angewendet."
@@ -1442,7 +1471,11 @@ def render_scenario() -> None:
                 )
 
         with evaluation_col:
-            with st.container(border=True, key="scenario_evaluation"):
+            with st.container(
+                border=True,
+                key="scenario_evaluation",
+                height="stretch",
+            ):
                 st.markdown("#### 3 · Auswertung")
                 st.caption(
                     "Die Schwelle verändert nur die Einordnung der Lastkurve."
