@@ -97,6 +97,17 @@ manuell veränderbar. Angezeigt werden Szenario-Lastspitze, Tagesenergie,
 Spitzenzeit und Stunden oberhalb der gewählten historischen Quantilschwelle.
 Das 99-%-Quantil ist der bewusst konservativere Standard.
 
+Zusätzlich koppelt ein Annahmenjahr von 2020 bis 2050 die fünf sichtbaren
+Wetter- und Strukturregler. Der linear interpolierte Endpunkt 2050 setzt
+\(+1{,}5\,^\circ\mathrm{C}\), \(+35\,\%\) Nachfrage,
+\(+2.000\,\mathrm{MW}\) Rechenzentrumslast und jeweils \(102\,\%\) der
+typischen direkten und diffusen Strahlung. Das Szenariodatum bleibt getrennt,
+damit Kalender- und Wochentagseffekte den Pfadvergleich nicht verfälschen.
+Die europaweit einheitlichen Werte sind an EEA, ENTSO-E/ENTSOG TYNDP 2024,
+IEA *Energy and AI* sowie Segado-Moreno et al. (2026,
+DOI `10.1016/j.rse.2025.115122`) angelehnt. Sie sind transparente
+Stressannahmen und keine länderscharfe Prognose.
+
 ## Wahrscheinlichkeit eines extremen Lastzustands
 
 Die Kennzahl beschreibt ausschließlich die Überschreitung einer historischen

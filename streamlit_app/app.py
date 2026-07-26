@@ -20,6 +20,11 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from gridcast.config import COUNTRY_REGISTRY
 from gridcast.formatting import format_energy_mwh, format_power_mw
+from gridcast.future_path import (
+    FUTURE_PATH_BASE_YEAR,
+    FUTURE_PATH_END_YEAR,
+    interpolate_future_path,
+)
 from gridcast.risk import (
     empirical_extreme_probabilities,
     extreme_day_probability,
@@ -144,6 +149,32 @@ SERIES_COLORS = {
     "ML-Wetterszenario": "#4C78A8",
     "Gesamtszenario": "#D1495B",
 }
+
+FUTURE_PATH_HELP = (
+    "Der Regler interpoliert einen transparenten europäischen Stresspfad "
+    "linear von 2020 bis 2050. Das separate Szenariodatum bleibt bewusst "
+    "unverändert, damit Kalender- und Wochentagseffekte nicht mit dem "
+    "Annahmenpfad vermischt werden. Der Endpunkt 2050 setzt +1,5 °C "
+    "gegenüber dem historischen Monatsmedian 1980–2019, +35 % "
+    "strukturelle Nachfrage, +2.000 MW konstante Rechenzentrumslast sowie "
+    "je 102 % des typischen direkten und diffusen Strahlungsprofils. Die "
+    "Nachfrage orientiert sich am TYNDP-2024-Szenario Global Ambition "
+    "(mehr als +35 % direkte Stromnachfrage bis 2050). Der starke "
+    "Rechenzentrumsanstieg ist an die IEA-Projektion für Europa bis 2030 "
+    "angelehnt. EEA und CMIP6-Studien stützen weitere Erwärmung und einen "
+    "abgeschwächten europäischen Brightening-Trend von weniger als "
+    "1 W/m² pro Jahrzehnt bis 2054. Weil "
+    "dieser Strahlungstrend nicht robust in direkte und diffuse Anteile "
+    "aufgeteilt werden kann, skaliert die App beide konservativ gleich. "
+    "Die Werte sind europaweit einheitliche, illustrative Annahmen und "
+    "keine länderscharfe Prognose. Quellen: [EEA – Global and European "
+    "temperatures](https://www.eea.europa.eu/en/analysis/indicators/"
+    "global-and-european-temperatures), [ENTSO-E/ENTSOG – TYNDP 2024]"
+    "(https://2024.entsos-tyndp-scenarios.eu/scenario-results/), "
+    "[IEA – Energy and AI](https://www.iea.org/reports/energy-and-ai/"
+    "energy-demand-from-ai) sowie [Segado-Moreno et al. (2026)]"
+    "(https://doi.org/10.1016/j.rse.2025.115122)."
+)
 
 
 st.set_page_config(
@@ -373,6 +404,10 @@ def apply_visual_theme() -> None:
         .st-key-scenario_presets [data-testid="stAlert"] p {
             font-size: 0.78rem;
             line-height: 1.3;
+        }
+
+        .st-key-scenario_future_path [data-testid="stVerticalBlock"] {
+            gap: 0.5rem;
         }
 
         .st-key-scenario_results h3 {
@@ -1154,7 +1189,10 @@ def render_backtest() -> None:
 def initialize_scenario_state() -> None:
     if "scenario_preset" not in st.session_state:
         st.session_state["scenario_preset"] = "Historische Referenz"
-    preset = SCENARIO_PRESETS[st.session_state["scenario_preset"]]
+    preset = SCENARIO_PRESETS.get(
+        st.session_state["scenario_preset"],
+        SCENARIO_PRESETS["Historische Referenz"],
+    )
     st.session_state.setdefault(
         "scenario_temperature_delta",
         preset["temperature_delta"],
@@ -1176,6 +1214,10 @@ def initialize_scenario_state() -> None:
         preset["data_centre_mw"],
     )
     st.session_state.setdefault("scenario_quantile", 0.99)
+    st.session_state.setdefault(
+        "scenario_future_year",
+        FUTURE_PATH_BASE_YEAR,
+    )
 
 
 def apply_scenario_preset(name: str) -> None:
@@ -1192,6 +1234,31 @@ def apply_scenario_preset(name: str) -> None:
     ]
     st.session_state["scenario_demand_change"] = preset["demand_change"]
     st.session_state["scenario_data_centre_mw"] = preset["data_centre_mw"]
+    st.session_state["scenario_future_year"] = FUTURE_PATH_BASE_YEAR
+
+
+def apply_future_path() -> None:
+    """Überträgt den gewählten Pfadwert auf alle gekoppelten Eingaben."""
+
+    assumptions = interpolate_future_path(
+        st.session_state["scenario_future_year"]
+    )
+    st.session_state["scenario_temperature_delta"] = (
+        assumptions.temperature_delta_c
+    )
+    st.session_state["scenario_direct_radiation_pct"] = (
+        assumptions.direct_radiation_pct
+    )
+    st.session_state["scenario_diffuse_radiation_pct"] = (
+        assumptions.diffuse_radiation_pct
+    )
+    st.session_state["scenario_demand_change"] = (
+        assumptions.demand_change_pct
+    )
+    st.session_state["scenario_data_centre_mw"] = (
+        assumptions.data_centre_mw
+    )
+    st.session_state["scenario_preset"] = None
 
 
 def set_scenario_quantile(quantile: float) -> None:
@@ -1467,10 +1534,17 @@ def render_scenario() -> None:
                             on_click=apply_scenario_preset,
                             args=(name,),
                         )
-            active_preset = SCENARIO_PRESETS[
+            active_preset = SCENARIO_PRESETS.get(
                 st.session_state["scenario_preset"]
-            ]
-            st.info(active_preset["description"], icon="💡")
+            )
+            if active_preset is None:
+                st.info(
+                    "Gekoppelter Zukunftspfad aktiv; die Einzelregler können "
+                    "anschließend bewusst feinjustiert werden.",
+                    icon="🧭",
+                )
+            else:
+                st.info(active_preset["description"], icon="💡")
 
         with st.container(border=True, key="scenario_ml_inputs"):
             st.markdown("#### 1 · Direkte ML-Eingaben")
@@ -1503,7 +1577,7 @@ def render_scenario() -> None:
                     "Temperaturabweichung (°C)",
                     min_value=-5.0,
                     max_value=5.0,
-                    step=0.5,
+                    step=0.1,
                     key="scenario_temperature_delta",
                     help="Abweichung vom historischen Monatsmedian.",
                 )
@@ -1512,7 +1586,7 @@ def render_scenario() -> None:
                     "Direkte Sonneneinstrahlung",
                     min_value=0,
                     max_value=200,
-                    step=5,
+                    step=1,
                     key="scenario_direct_radiation_pct",
                     format="%d %%",
                     help=(
@@ -1529,7 +1603,7 @@ def render_scenario() -> None:
                     "Diffuse Sonneneinstrahlung",
                     min_value=0,
                     max_value=200,
-                    step=5,
+                    step=1,
                     key="scenario_diffuse_radiation_pct",
                     format="%d %%",
                     help=(
@@ -1608,6 +1682,35 @@ def render_scenario() -> None:
                     "Historische nationale Lastschwelle 2015–2017; "
                     "Unsicherheit aus Residualtagen der Validierung 2018."
                 )
+
+        with st.container(border=True, key="scenario_future_path"):
+            st.markdown("#### 4 · Gekoppelter Zukunftspfad bis 2050")
+            st.caption(
+                "Ein gemeinsames Annahmenjahr setzt Wetter- und "
+                "Strukturregler; Szenariodatum und Einzelwerte bleiben "
+                "separat editierbar."
+            )
+            future_year = st.slider(
+                "Zukunftsjahr",
+                min_value=FUTURE_PATH_BASE_YEAR,
+                max_value=FUTURE_PATH_END_YEAR,
+                step=1,
+                key="scenario_future_year",
+                on_change=apply_future_path,
+                help=FUTURE_PATH_HELP,
+            )
+            future_assumptions = interpolate_future_path(future_year)
+            formatted_data_centre = (
+                f"{future_assumptions.data_centre_mw:,}".replace(",", ".")
+            )
+            st.caption(
+                f"Pfadvorgabe {future_year}: "
+                f"{future_assumptions.temperature_delta_c:+.1f} °C · "
+                f"+{future_assumptions.demand_change_pct} % Nachfrage · "
+                f"+{formatted_data_centre} MW Rechenzentren · "
+                f"{future_assumptions.direct_radiation_pct} % direkte und "
+                f"diffuse Strahlung"
+            )
 
     model = load_model()
     climatology = load_climatology()
@@ -1764,9 +1867,11 @@ def render_scenario() -> None:
 
                 1. Kalendermerkmale folgen dem gewählten Datum.
                 2. Wetter ist der historische Median nach Land, Monat und Stunde.
-                3. Temperatur sowie direkte und diffuse Strahlung werden vor
+                3. Der optionale Zukunftspfad koppelt ausschließlich die
+                   sichtbaren Wetter- und Strukturregler.
+                4. Temperatur sowie direkte und diffuse Strahlung werden vor
                    der ML-Inferenz verändert.
-                4. Nachfrage und Rechenzentrumslast werden danach transparent
+                5. Nachfrage und Rechenzentrumslast werden danach transparent
                    angewendet.
                 """
             )
@@ -1850,6 +1955,8 @@ def render_methodology() -> None:
         - Reanalysewetter im Backtest ist keine echte Wettervorhersage.
         - Regionale deutsche Feiertage sind nicht separat modelliert.
         - Zukunftsaufschläge sind Annahmen, keine kausal gelernten Langfristtrends.
+        - Der gekoppelte Zukunftspfad interpoliert Quellenanker europaweit
+          einheitlich und ist keine länderscharfe Prognose.
         - Das refittete App-Modell hat keine neue unabhängige Testkennzahl.
         - Extremzustand bedeutet eine historische Quantilsüberschreitung,
           nicht einen Netzausfall.
