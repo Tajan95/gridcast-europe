@@ -43,11 +43,17 @@ def test_streamlit_app_and_deployment_assets_exist():
     assert ".st-key-scenario_controls" in source
     assert ".st-key-scenario_results" in source
     assert "[data-testid=\"stMarkdownContainer\"]:has(h4)" in source
+    assert "[data-testid=\"stMarkdownContainer\"]:has(h3)" in source
+    assert "padding-bottom: 0.46rem" in source
     assert 'key="scenario_structure_inputs",' in source
     assert 'key="scenario_evaluation",' in source
     assert source.count('height="stretch",') >= 2
     assert 'orient="bottom"' in source
     assert "columns=2" in source
+    assert source.count('format="DD.MM.YYYY"') == 2
+    assert "Histogram Gradient Boosting" in source
+    assert "historischen Median für Land und Monat aus" in source
+    assert "der 24 stündlichen Medianwerte mit 1,5" in source
     assert "format_power_mw" in source
     assert "format_energy_mwh" in source
     assert "Technischer Deployment- und Reproduzierbarkeitsstatus" in source

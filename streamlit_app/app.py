@@ -338,7 +338,12 @@ def apply_visual_theme() -> None:
 
         .st-key-scenario_controls
         [data-testid="stMarkdownContainer"]:has(h4) {
-            padding-bottom: 0.28rem;
+            padding-bottom: 0.46rem;
+        }
+
+        .st-key-scenario_controls
+        [data-testid="stMarkdownContainer"]:has(h3) {
+            padding-bottom: 0.34rem;
         }
 
         .st-key-scenario_controls [data-testid="stCaptionContainer"] p {
@@ -371,9 +376,14 @@ def apply_visual_theme() -> None:
         }
 
         .st-key-scenario_results h3 {
-            margin: 0 0 0.25rem;
+            margin: 0;
             padding: 0;
             font-size: 1.35rem;
+        }
+
+        .st-key-scenario_results
+        [data-testid="stMarkdownContainer"]:has(h3) {
+            padding-bottom: 0.46rem;
         }
 
         .st-key-scenario_results [data-testid="stMetric"] {
@@ -714,10 +724,43 @@ def render_overview() -> None:
     )
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Test-Makro-nMAE 2019", "2,71 %", help="Länderweise gleichgewichtet.")
-    col2.metric("Fehlerreduktion vs. Kalender", "44,5 %")
-    col3.metric("Teststunden 2019", "26.275")
-    col4.metric("Freigegebene Länder", "3")
+    col1.metric(
+        "Test-Makro-nMAE 2019",
+        "2,71 %",
+        help=(
+            "nMAE = normalisierter mittlerer absoluter Fehler. Für jedes Land "
+            "wird der MAE durch dessen mittlere tatsächliche Last geteilt; "
+            "Makro bezeichnet den gleichgewichteten Mittelwert von DE, FR und "
+            "PL. Je kleiner, desto besser. Gemessen im unangetasteten Testjahr "
+            "2019."
+        ),
+    )
+    col2.metric(
+        "Fehlerreduktion vs. Kalender",
+        "44,5 %",
+        help=(
+            "Relative Verringerung des Test-Makro-nMAE gegenüber der starken "
+            "Kalender-Baseline: von 4,88 % auf 2,71 %. Ein positiver Wert "
+            "bedeutet, dass das HGB-Modell genauer ist."
+        ),
+    )
+    col3.metric(
+        "Teststunden 2019",
+        "26.275",
+        help=(
+            "Anzahl der nach der Datenqualitätsprüfung auswertbaren "
+            "Länder-Stunden im unabhängigen Testjahr 2019, zusammengezählt "
+            "für Deutschland, Frankreich und Polen."
+        ),
+    )
+    col4.metric(
+        "Freigegebene Länder",
+        "3",
+        help=(
+            "Deutschland, Frankreich und Polen erfüllten die festgelegten "
+            "Datenqualitätsanforderungen und gingen in die Modellauswertung ein."
+        ),
+    )
 
     st.markdown("## Europas Lastprofile im Modell")
     st.caption(
@@ -770,10 +813,23 @@ def render_overview() -> None:
                 unsafe_allow_html=True,
             )
             metric_left, metric_right = st.columns(2)
-            metric_left.metric("Test-nMAE", format_pct(row["nmae_pct"], 2))
+            metric_left.metric(
+                "Test-nMAE",
+                format_pct(row["nmae_pct"], 2),
+                help=(
+                    "Normalisierter mittlerer absoluter Fehler des gewählten "
+                    "Landes im Testjahr 2019: MAE geteilt durch die mittlere "
+                    "tatsächliche Last. Je kleiner, desto besser."
+                ),
+            )
             metric_right.metric(
                 "Mittlere Last (MW)",
                 f"{row['mittlere_last_mw']:,.0f}".replace(",", "."),
+                help=(
+                    "Durchschnitt der tatsächlich beobachteten stündlichen "
+                    "Stromlast des gewählten Landes im Testjahr 2019. "
+                    "MW = Megawatt."
+                ),
             )
             st.markdown(
                 f"""
@@ -975,6 +1031,7 @@ def render_backtest() -> None:
                 min_value=available_dates[0],
                 max_value=available_dates[-1],
                 key="backtest_date",
+                format="DD.MM.YYYY",
             )
         with note_col:
             st.markdown(
@@ -1006,10 +1063,44 @@ def render_backtest() -> None:
     largest_error_hour = int(day.iloc[largest_error_index]["local_hour"])
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Tages-MAE HGB", format_mw(mae))
-    col2.metric("Tages-nMAE HGB", format_pct(nmae, 2))
-    col3.metric("Fehlerreduktion vs. Kalender", format_pct(improvement, 1))
-    col4.metric("Größte Abweichung um", format_hour(largest_error_hour))
+    col1.metric(
+        "Tages-MAE HGB",
+        format_mw(mae),
+        help=(
+            "MAE = mittlerer absoluter Fehler. Angezeigt wird die mittlere "
+            "absolute Differenz zwischen Ist-Last und HGB-Prognose über alle "
+            "Stunden des gewählten Tages, gemessen in MW. HGB steht für "
+            "Histogram Gradient Boosting, das verwendete Regressionsmodell. "
+            "Je kleiner, desto besser."
+        ),
+    )
+    col2.metric(
+        "Tages-nMAE HGB",
+        format_pct(nmae, 2),
+        help=(
+            "nMAE = normalisierter MAE. Der Tages-MAE des HGB wird durch die "
+            "mittlere tatsächliche Last desselben Tages geteilt. Die "
+            "Prozentzahl ist dadurch zwischen unterschiedlich großen Ländern "
+            "und Tagen besser vergleichbar. Je kleiner, desto besser."
+        ),
+    )
+    col3.metric(
+        "Fehlerreduktion vs. Kalender",
+        format_pct(improvement, 1),
+        help=(
+            "Relative Verringerung des Tages-MAE gegenüber einer starken "
+            "Kalender-Baseline ohne Wettermerkmale. Ein positiver Wert "
+            "bedeutet, dass das HGB an diesem Tag genauer prognostiziert."
+        ),
+    )
+    col4.metric(
+        "Größte Abweichung um",
+        format_hour(largest_error_hour),
+        help=(
+            "Lokale Stunde, in der die absolute Differenz zwischen Ist-Last "
+            "und HGB-Prognose am gewählten Tag am größten ist."
+        ),
+    )
 
     st.altair_chart(
         build_backtest_chart(day),
@@ -1404,6 +1495,7 @@ def render_scenario() -> None:
                     min_value=date(2020, 1, 1),
                     max_value=date(2050, 12, 31),
                     key="scenario_date",
+                    format="DD.MM.YYYY",
                 )
             temp_col, direct_col, diffuse_col = st.columns(3, gap="small")
             with temp_col:
@@ -1424,8 +1516,12 @@ def render_scenario() -> None:
                     key="scenario_direct_radiation_pct",
                     format="%d %%",
                     help=(
-                        "Anteil des typischen direkten Strahlungsprofils; "
-                        "100 % entspricht dem historischen Monatsmedian."
+                        "Direkte Strahlung trifft ungestreut aus Sonnenrichtung "
+                        "auf eine horizontale Fläche; die Modellwerte werden in "
+                        "W/m² gemessen. 100 % übernimmt für jede lokale Stunde "
+                        "den historischen Median für Land und Monat aus "
+                        "1980–2019. Beispielsweise multiplizieren 150 % jeden "
+                        "der 24 stündlichen Medianwerte mit 1,5."
                     ),
                 )
             with diffuse_col:
@@ -1437,8 +1533,13 @@ def render_scenario() -> None:
                     key="scenario_diffuse_radiation_pct",
                     format="%d %%",
                     help=(
-                        "Anteil des typischen diffusen Strahlungsprofils; "
-                        "100 % entspricht dem historischen Monatsmedian."
+                        "Diffuse Strahlung erreicht eine horizontale Fläche "
+                        "nach Streuung durch Atmosphäre und Wolken; die "
+                        "Modellwerte werden in W/m² gemessen. 100 % übernimmt "
+                        "für jede lokale Stunde den historischen Median für "
+                        "Land und Monat aus 1980–2019. Beispielsweise "
+                        "multiplizieren 150 % jeden der 24 stündlichen "
+                        "Medianwerte mit 1,5."
                     ),
                 )
 
