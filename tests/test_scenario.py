@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from gridcast.scenario import (
+    SCENARIO_API_VERSION,
     apply_structural_scenario,
     build_scenario_features,
     predict_scenario_day,
@@ -91,6 +92,15 @@ def test_structural_scenario_is_explicit_and_monotonic():
         additional_data_centre_load_mw=50.0,
     )
     assert np.allclose(result, [160.0, 270.0])
+
+
+def test_structural_scenario_accepts_numpy_scalar_load():
+    assert SCENARIO_API_VERSION == 2
+    result = apply_structural_scenario(
+        [100.0, 200.0],
+        additional_data_centre_load_mw=np.int64(50),
+    )
+    assert np.allclose(result, [150.0, 250.0])
 
 
 def test_final_model_predicts_complete_scenario():

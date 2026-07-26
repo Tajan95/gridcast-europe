@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
+from importlib import invalidate_caches, reload
 import json
 from pathlib import Path
 import sys
@@ -22,7 +23,7 @@ from gridcast.risk import (
     empirical_extreme_probabilities,
     extreme_day_probability,
 )
-from gridcast.scenario import predict_scenario_day, summarize_scenario
+from gridcast import scenario as scenario_logic
 
 
 MODEL_PATH = PROJECT_ROOT / "models" / "gridcast_final_2015_2019.joblib"
@@ -32,6 +33,7 @@ CLIMATOLOGY_PATH = (
 )
 RISK_PATH = PROJECT_ROOT / "data" / "app" / "risk_calibration_2018.npz"
 K_REPORT_PATH = PROJECT_ROOT / "reports" / "k_deployment.json"
+EXPECTED_SCENARIO_API_VERSION = 2
 
 COUNTRY_LABELS = {
     code: f"{spec.name} ({code})" for code, spec in COUNTRY_REGISTRY.items()
@@ -167,7 +169,7 @@ def apply_visual_theme() -> None:
 
         [data-testid="stMainBlockContainer"] {
             max-width: 1320px;
-            padding-top: 2rem;
+            padding-top: 4.5rem;
             padding-bottom: 4rem;
         }
 
@@ -349,6 +351,26 @@ def load_risk_calibration() -> dict[str, np.ndarray]:
 @st.cache_data
 def load_k_report() -> dict:
     return json.loads(K_REPORT_PATH.read_text(encoding="utf-8"))
+
+
+def get_scenario_logic():
+    """Lädt bei einem Cloud-Hot-Reload garantiert die aktuelle Szenario-API."""
+
+    if (
+        getattr(scenario_logic, "SCENARIO_API_VERSION", 0)
+        < EXPECTED_SCENARIO_API_VERSION
+    ):
+        invalidate_caches()
+        reload(scenario_logic)
+    if (
+        getattr(scenario_logic, "SCENARIO_API_VERSION", 0)
+        < EXPECTED_SCENARIO_API_VERSION
+    ):
+        raise RuntimeError(
+            "App- und Szenariomodul besitzen unterschiedliche Versionen. "
+            "Bitte die Streamlit-App neu starten."
+        )
+    return scenario_logic
 
 
 @st.cache_data
@@ -637,8 +659,8 @@ def render_overview() -> None:
             metric_left, metric_right = st.columns(2)
             metric_left.metric("Test-nMAE", format_pct(row["nmae_pct"], 2))
             metric_right.metric(
-                "Mittlere Last",
-                format_mw(row["mittlere_last_mw"]),
+                "Mittlere Last (MW)",
+                f"{row['mittlere_last_mw']:,.0f}".replace(",", "."),
             )
             st.markdown(
                 f"""
@@ -887,7 +909,7 @@ def render_backtest() -> None:
             f"{len(day)} statt 24 beobachtete Stunden."
         )
 
-    with st.expander("Stundendaten und exakte Fehlerwerte"):
+    with st.expander("Stundendaten und exakte Fehlerwerte", expanded=True):
         table = day[
             [
                 "utc_timestamp",
@@ -949,6 +971,7 @@ def initialize_scenario_state() -> None:
         "scenario_data_centre_mw",
         preset["data_centre_mw"],
     )
+    st.session_state.setdefault("scenario_quantile", 0.99)
 
 
 def apply_scenario_preset(name: str) -> None:
@@ -965,6 +988,10 @@ def apply_scenario_preset(name: str) -> None:
     ]
     st.session_state["scenario_demand_change"] = preset["demand_change"]
     st.session_state["scenario_data_centre_mw"] = preset["data_centre_mw"]
+
+
+def set_scenario_quantile(quantile: float) -> None:
+    st.session_state["scenario_quantile"] = quantile
 
 
 def build_scenario_chart(scenario: pd.DataFrame) -> alt.Chart:
@@ -1317,12 +1344,29 @@ def render_scenario() -> None:
         )
         quantile_col, explanation_col = st.columns([1, 2])
         with quantile_col:
-            quantile = st.select_slider(
-                "Extremzustandsschwelle",
-                options=[0.95, 0.99],
-                value=0.99,
-                format_func=lambda value: f"{int(100 * value)}-%-Quantil",
-            )
+            st.markdown("**Extremzustandsschwelle**")
+            q95_col, q99_col = st.columns(2, gap="small")
+            quantile = float(st.session_state["scenario_quantile"])
+            with q95_col:
+                st.button(
+                    "Q95",
+                    key="scenario_quantile_q95",
+                    type="primary" if quantile == 0.95 else "secondary",
+                    width="stretch",
+                    on_click=set_scenario_quantile,
+                    args=(0.95,),
+                    help="95-%-Quantil der historischen Last 2015–2017.",
+                )
+            with q99_col:
+                st.button(
+                    "Q99",
+                    key="scenario_quantile_q99",
+                    type="primary" if quantile == 0.99 else "secondary",
+                    width="stretch",
+                    on_click=set_scenario_quantile,
+                    args=(0.99,),
+                    help="99-%-Quantil der historischen Last 2015–2017.",
+                )
         with explanation_col:
             st.markdown(
                 "Verglichen wird mit einer historischen nationalen "
@@ -1332,7 +1376,8 @@ def render_scenario() -> None:
 
     model = load_model()
     climatology = load_climatology()
-    scenario = predict_scenario_day(
+    current_scenario_logic = get_scenario_logic()
+    scenario = current_scenario_logic.predict_scenario_day(
         model,
         climatology,
         country=country,
@@ -1343,7 +1388,7 @@ def render_scenario() -> None:
         demand_change_fraction=demand_change_pct / 100.0,
         additional_data_centre_load_mw=data_centre_mw,
     )
-    summary = summarize_scenario(scenario)
+    summary = current_scenario_logic.summarize_scenario(scenario)
 
     risk = load_risk_calibration()
     threshold_key = f"threshold_q{int(100 * quantile)}_{country}"

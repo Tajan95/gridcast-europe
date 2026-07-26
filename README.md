@@ -1,4 +1,4 @@
-# GridCast Europe
+# ⚡ GridCast Europe
 
 Machine-Learning-Projekt zur stündlichen Stromlastprognose für Deutschland,
 Frankreich und Polen im IU-Modul **Data Analytics und Big Data**. Das
@@ -12,7 +12,7 @@ historischen Backtest mit einer klar getrennten Zukunftsszenarioanalyse.
 > 41 statt zuvor 129 Pakete und vermeidet den nativen Absturz der automatisch
 > gewählten Python-3.14-Laufzeit.
 
-## Forschungsfrage
+## 🎯 Forschungsfrage
 
 > Wie genau lässt sich die stündliche Stromlast ausgewählter europäischer
 > Länder anhand historischer Last-, Wetter- und Kalenderdaten für einen
@@ -23,7 +23,7 @@ Die Streamlit-Erweiterung untersucht zusätzlich, wie sich ein historisch
 abgeleitetes Lastprofil unter veränderten Temperatur- und Strahlungsprofilen
 sowie expliziten Nachfrage- und Rechenzentrumsannahmen verändert.
 
-## Kernergebnisse
+## 📊 Kernergebnisse
 
 | Ergebnis | Wert |
 |---|---:|
@@ -39,7 +39,7 @@ Das Modell wurde ausschließlich anhand von Training und Validierung ausgewählt
 Erst danach wurde die eingefrorene Konfiguration auf 2015–2018 refittet und
 einmalig auf 2019 getestet.
 
-## Zwei bewusst getrennte Aussageebenen
+## 🧭 Zwei bewusst getrennte Aussageebenen
 
 1. **Historischer Backtest:** tatsächliches Reanalysewetter und gemessene Last
    aus dem unangetasteten Testjahr 2019; direkter Vergleich von HGB,
@@ -53,7 +53,7 @@ Wettervorhersage oder autonome Langfristprognose. Der explorative
 Extremzustandsindikator beschreibt die Überschreitung einer historischen
 Lastschwelle und ausdrücklich **keine Blackout-Wahrscheinlichkeit**.
 
-## QUA³CK-Projektverlauf
+## 🔄 QUA³CK-Projektverlauf
 
 | Phase | Hauptartefakt | Inhalt |
 |---|---|---|
@@ -67,7 +67,7 @@ Die kompakten, maschinenlesbaren Ergebnisse liegen unter
 [`reports/a3/`](reports/a3/), [`reports/c/`](reports/c/) und im
 [`K-Deploymentreport`](reports/k_deployment.json).
 
-## Datenquellen
+## 🗂️ Datenquellen
 
 - [OPSD Time Series, Version 2020-10-06](https://doi.org/10.25832/time_series/2020-10-06):
   nationale stündliche Stromlast
@@ -79,7 +79,7 @@ Zwischendaten werden nicht versioniert; der Download ist über
 [`scripts/download_opsd_data.py`](scripts/download_opsd_data.py)
 reproduzierbar.
 
-## Streamlit-App lokal starten
+## 🚀 Streamlit-App lokal starten
 
 ```bash
 python -m pip install -r requirements.txt
@@ -94,7 +94,7 @@ Inferenz wird ausschließlich das verifizierte Modell
 [`models/gridcast_final_2015_2019.joblib`](models/gridcast_final_2015_2019.joblib)
 verwendet.
 
-## Prüfungsartefakte
+## 📦 Prüfungsartefakte
 
 - [Fünfseitiges Handout (PDF)](documents/GridCast_Europe_Handout.pdf)
 - [Editierbares Handout (DOCX)](documents/GridCast_Europe_Handout.docx)
@@ -103,7 +103,7 @@ verwendet.
 - [Sprechtext](documents/GridCast_Europe_Sprechtext.md)
 - [Dokumentation der KI-Nutzung](documents/KI-Nutzung.md)
 
-## Repository-Struktur
+## 🏗️ Repository-Struktur
 
 ```text
 data/app/           kompakte Deployment-Daten
@@ -118,7 +118,7 @@ streamlit_app/      interaktive Anwendung
 tests/              automatisierte Modell-, Risiko- und App-Tests
 ```
 
-## Grenzen
+## ⚠️ Grenzen
 
 - Gültigkeit nur für DE, FR und PL sowie den Lastzeitraum 2015–2019.
 - Reanalysewetter im Backtest ist keine operative Wetterprognose.

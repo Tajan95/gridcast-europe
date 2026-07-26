@@ -15,6 +15,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from datetime import date, datetime
 import math
+from numbers import Real
 
 import numpy as np
 import pandas as pd
@@ -22,6 +23,8 @@ import pandas as pd
 from .config import COUNTRY_REGISTRY
 from .modeling import add_modeling_features
 
+
+SCENARIO_API_VERSION = 2
 
 CLIMATOLOGY_COLUMNS: tuple[str, ...] = (
     "country",
@@ -147,7 +150,7 @@ def build_scenario_features(
 def apply_structural_scenario(
     weather_adjusted_forecast_mw: Sequence[float],
     demand_change_fraction: float = 0.0,
-    additional_data_centre_load_mw: float | Sequence[float] = 0.0,
+    additional_data_centre_load_mw: Real | Sequence[float] = 0.0,
 ) -> list[float]:
     """Apply explicit structural assumptions to a rerun ML forecast."""
 
@@ -161,7 +164,7 @@ def apply_structural_scenario(
         raise ValueError(
             "demand_change_fraction must be finite and greater than -1"
         )
-    if isinstance(additional_data_centre_load_mw, (int, float)):
+    if isinstance(additional_data_centre_load_mw, Real):
         additions = [float(additional_data_centre_load_mw)] * len(forecast)
     else:
         additions = [float(value) for value in additional_data_centre_load_mw]
@@ -187,7 +190,7 @@ def predict_scenario_day(
     direct_radiation_factor: float = 1.0,
     diffuse_radiation_factor: float = 1.0,
     demand_change_fraction: float = 0.0,
-    additional_data_centre_load_mw: float | Sequence[float] = 0.0,
+    additional_data_centre_load_mw: Real | Sequence[float] = 0.0,
 ) -> pd.DataFrame:
     """Berechnet Basis-, Wetter- und Gesamtszenario für einen Kalendertag."""
 
