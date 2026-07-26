@@ -1,6 +1,7 @@
 # K – Knowledge Transfer
 
-**Stand:** 25.07.2026  
+**Stand:** 26.07.2026
+
 **Status:** Projektartefakte abgeschlossen; Cloud-Deployment stabil aktiv
 
 ## Ziel der Phase
@@ -31,7 +32,7 @@ Featuregruppe und Hyperparameter werden dabei nicht nachträglich verändert.
 |---|---|---|
 | Überblick | Kernergebnisse und interaktive Europakarte für DE/FR/PL | C-Backtest 2019 und K-Reports |
 | Historischer Backtest | Istwert, HGB und gestrichelte Kalender-Baseline mit Hoverwerten | echte Out-of-sample-Prognosen 2019 |
-| Zukunftsszenario | fünf Presets, manuelle Annahmen und Zukunftsvergleichswerte | finales App-Modell, Klimatologie und Risikokalibrierung |
+| Zukunftsszenario | Wetter-Cockpit, sieben Presets, Strukturannahmen und Zukunftsvergleichswerte | finales App-Modell, Klimatologie und Risikokalibrierung |
 | Methodik | QUA³CK, Modellvergleich, Grenzen und technischer Status | versionierte Projektartefakte |
 
 ## Historischer Backtest und App-Modell
@@ -56,25 +57,37 @@ Für Land und Datum erzeugt die App ein nominales 24-Stunden-Profil:
 1. Kalendermerkmale folgen dem gewählten Datum.
 2. Typisches Wetter ist der Median aus 1980–2019 nach
    `Land × Monat × lokale Stunde`.
-3. Eine Temperaturabweichung verändert die Wetterfeatures vor der
-   ML-Inferenz.
+3. Temperaturabweichung sowie Faktoren für direkte und diffuse Strahlung
+   verändern die Wetterfeatures vor einer erneuten ML-Inferenz.
 4. Nachfrageänderung und Rechenzentrumslast werden danach als explizite
    Annahmen angewendet.
 
 ```math
 \widehat L^{scenario}_{c,t}
 =
-f_{ML}(C_{c,t}, W^{typ}_{c,t}+\Delta T)\cdot(1+g)
+f_{ML}\left(
+C_{c,t},
+T^{typ}_{c,t}+\Delta T,
+r_{dir}R^{typ}_{dir,c,t},
+r_{dif}R^{typ}_{dif,c,t}
+\right)\cdot(1+g)
 +\Delta L_{DC,c,t}
 ```
 
 Das Ergebnis ist eine Was-wäre-wenn-Rechnung. Es ist weder eine konkrete
 Wettervorhersage noch eine autonome Lastprognose bis 2030 oder 2050.
 
-Die App bietet fünf illustrative Einstiegspunkte:
+Die direkten ML-Eingaben sind in der App sichtbar von nachgelagerten
+Strukturannahmen und dem reinen Auswertungsparameter getrennt. Ein eigener
+Tab stellt das typische und das tatsächlich an das HGB übergebene Temperatur-
+und Strahlungsprofil gegenüber.
+
+Die App bietet sieben illustrative Einstiegspunkte:
 
 - historische Referenz,
 - kalter Wintertag,
+- sonniger Tag,
+- bewölkter Tag,
 - Elektrifizierung,
 - Rechenzentrumsboom,
 - kombinierter Stresstest.
@@ -169,10 +182,11 @@ Bestanden sind:
 - exakte Reproduktion des C-Makro-nMAE,
 - frisches Laden des finalen Modells,
 - gültige 24-Stunden-Szenarioinferenz,
-- elf Modell-, Szenario-, Risiko- und App-Strukturtests,
+- zwölf Modell-, Szenario-, Risiko- und App-Strukturtests,
 - lokaler Streamlit-Serverstart mit erfolgreichem Health-Check,
 - fehlerfreie Ausführung aller vier App-Ansichten,
-- Preset-Interaktion mit Neuberechnung aller Szenariokennzahlen,
+- Wetter-Preset-Interaktion mit neuer HGB-Inferenz und Neuberechnung aller
+  Szenariokennzahlen,
 - prüfsummenbasierte Kontrolle aller App-Daten.
 
 ## Bereitstellung

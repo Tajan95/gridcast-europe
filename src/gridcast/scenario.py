@@ -49,15 +49,19 @@ def build_scenario_features(
     country: str,
     target_date: date | datetime | str | pd.Timestamp,
     temperature_delta_c: float = 0.0,
+    direct_radiation_factor: float = 1.0,
+    diffuse_radiation_factor: float = 1.0,
 ) -> pd.DataFrame:
     """Erzeugt ein nominales 24-Stunden-Featureprofil für ein Szenario.
 
     Das Wetter stammt aus dem historischen Medianprofil
-    ``Land × Monat × lokale Stunde``. ``temperature_delta_c`` verändert nur
-    die Temperatur; Strahlungsprofile bleiben auf ihrem klimatologischen
-    Median. Das Profil besitzt bewusst die lokalen Uhrstunden 0 bis 23. An
-    Tagen mit Sommerzeitwechsel ist es daher eine standardisierte
-    Szenariodarstellung und kein behaupteter UTC-Prognosehorizont.
+    ``Land × Monat × lokale Stunde``. ``temperature_delta_c`` verschiebt die
+    Temperatur, während ``direct_radiation_factor`` und
+    ``diffuse_radiation_factor`` die beiden nicht-negativen
+    Strahlungsprofile skalieren. Das Profil besitzt bewusst die lokalen
+    Uhrstunden 0 bis 23. An Tagen mit Sommerzeitwechsel ist es daher eine
+    standardisierte Szenariodarstellung und kein behaupteter
+    UTC-Prognosehorizont.
     """
 
     missing = sorted(set(CLIMATOLOGY_COLUMNS) - set(climatology.columns))
@@ -70,6 +74,16 @@ def build_scenario_features(
     delta = float(temperature_delta_c)
     if not math.isfinite(delta):
         raise ValueError("temperature_delta_c muss endlich sein.")
+    direct_factor = float(direct_radiation_factor)
+    diffuse_factor = float(diffuse_radiation_factor)
+    if not math.isfinite(direct_factor) or direct_factor < 0:
+        raise ValueError(
+            "direct_radiation_factor muss endlich und nicht-negativ sein."
+        )
+    if not math.isfinite(diffuse_factor) or diffuse_factor < 0:
+        raise ValueError(
+            "diffuse_radiation_factor muss endlich und nicht-negativ sein."
+        )
 
     profile = climatology.loc[
         climatology["country"].eq(country)
@@ -99,12 +113,14 @@ def build_scenario_features(
             "temperature_c": (
                 profile["temperature_c_median"].astype(float) + delta
             ),
-            "radiation_direct_wm2": profile[
-                "radiation_direct_wm2_median"
-            ].astype(float),
-            "radiation_diffuse_wm2": profile[
-                "radiation_diffuse_wm2_median"
-            ].astype(float),
+            "radiation_direct_wm2": (
+                profile["radiation_direct_wm2_median"].astype(float)
+                * direct_factor
+            ),
+            "radiation_diffuse_wm2": (
+                profile["radiation_diffuse_wm2_median"].astype(float)
+                * diffuse_factor
+            ),
         }
     )
 
@@ -127,17 +143,18 @@ def build_scenario_features(
     result["cooling_degrees"] = (result["temperature_c"] - 22.0).clip(lower=0)
     return add_modeling_features(result)
 
+
 def apply_structural_scenario(
-    temperature_adjusted_forecast_mw: Sequence[float],
+    weather_adjusted_forecast_mw: Sequence[float],
     demand_change_fraction: float = 0.0,
     additional_data_centre_load_mw: float | Sequence[float] = 0.0,
 ) -> list[float]:
     """Apply explicit structural assumptions to a rerun ML forecast."""
 
-    forecast = [float(value) for value in temperature_adjusted_forecast_mw]
+    forecast = [float(value) for value in weather_adjusted_forecast_mw]
     if not forecast or not all(math.isfinite(value) for value in forecast):
         raise ValueError(
-            "temperature_adjusted_forecast_mw must be finite and non-empty"
+            "weather_adjusted_forecast_mw must be finite and non-empty"
         )
     demand_change = float(demand_change_fraction)
     if not math.isfinite(demand_change) or demand_change <= -1.0:
@@ -167,6 +184,8 @@ def predict_scenario_day(
     country: str,
     target_date: date | datetime | str | pd.Timestamp,
     temperature_delta_c: float = 0.0,
+    direct_radiation_factor: float = 1.0,
+    diffuse_radiation_factor: float = 1.0,
     demand_change_fraction: float = 0.0,
     additional_data_centre_load_mw: float | Sequence[float] = 0.0,
 ) -> pd.DataFrame:
@@ -183,6 +202,8 @@ def predict_scenario_day(
         country=country,
         target_date=target_date,
         temperature_delta_c=temperature_delta_c,
+        direct_radiation_factor=direct_radiation_factor,
+        diffuse_radiation_factor=diffuse_radiation_factor,
     )
 
     base_prediction = np.asarray(model.predict(base_features), dtype=float)
@@ -212,6 +233,18 @@ def predict_scenario_day(
             "local_hour": base_features["local_hour"],
             "typical_temperature_c": base_features["temperature_c"],
             "scenario_temperature_c": weather_features["temperature_c"],
+            "typical_direct_radiation_wm2": base_features[
+                "radiation_direct_wm2"
+            ],
+            "scenario_direct_radiation_wm2": weather_features[
+                "radiation_direct_wm2"
+            ],
+            "typical_diffuse_radiation_wm2": base_features[
+                "radiation_diffuse_wm2"
+            ],
+            "scenario_diffuse_radiation_wm2": weather_features[
+                "radiation_diffuse_wm2"
+            ],
             "base_prediction_mw": base_prediction,
             "weather_prediction_mw": weather_prediction,
             "scenario_prediction_mw": scenario_prediction,

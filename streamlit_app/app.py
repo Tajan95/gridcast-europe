@@ -55,6 +55,8 @@ SCENARIO_PRESETS = {
     "Historische Referenz": {
         "icon": "◉",
         "temperature_delta": 0.0,
+        "direct_radiation_pct": 100,
+        "diffuse_radiation_pct": 100,
         "demand_change": 0,
         "data_centre_mw": 0,
         "description": "Typisches historisches Wetter, ohne Strukturaufschlag.",
@@ -62,13 +64,41 @@ SCENARIO_PRESETS = {
     "Kalter Wintertag": {
         "icon": "❄",
         "temperature_delta": -4.0,
+        "direct_radiation_pct": 100,
+        "diffuse_radiation_pct": 100,
         "demand_change": 0,
         "data_centre_mw": 0,
         "description": "Deutlich kälter als das typische Monatsprofil.",
     },
+    "Sonniger Tag": {
+        "icon": "☀",
+        "temperature_delta": 2.0,
+        "direct_radiation_pct": 160,
+        "diffuse_radiation_pct": 70,
+        "demand_change": 0,
+        "data_centre_mw": 0,
+        "description": (
+            "Mehr direkte und weniger diffuse Strahlung als im typischen "
+            "Monatsprofil."
+        ),
+    },
+    "Bewölkter Tag": {
+        "icon": "☁",
+        "temperature_delta": -1.0,
+        "direct_radiation_pct": 35,
+        "diffuse_radiation_pct": 140,
+        "demand_change": 0,
+        "data_centre_mw": 0,
+        "description": (
+            "Weniger direkte und mehr diffuse Strahlung als im typischen "
+            "Monatsprofil."
+        ),
+    },
     "Elektrifizierung": {
         "icon": "↗",
         "temperature_delta": 0.0,
+        "direct_radiation_pct": 100,
+        "diffuse_radiation_pct": 100,
         "demand_change": 15,
         "data_centre_mw": 0,
         "description": "Illustrativer struktureller Nachfrageanstieg um 15 %.",
@@ -76,6 +106,8 @@ SCENARIO_PRESETS = {
     "Rechenzentrumsboom": {
         "icon": "▦",
         "temperature_delta": 0.0,
+        "direct_radiation_pct": 100,
+        "diffuse_radiation_pct": 100,
         "demand_change": 0,
         "data_centre_mw": 2_000,
         "description": "Zusätzliche konstante Rechenzentrumslast von 2.000 MW.",
@@ -83,9 +115,14 @@ SCENARIO_PRESETS = {
     "Kombinierter Stresstest": {
         "icon": "⚠",
         "temperature_delta": -3.0,
+        "direct_radiation_pct": 50,
+        "diffuse_radiation_pct": 130,
         "demand_change": 15,
         "data_centre_mw": 2_000,
-        "description": "Kälte, Elektrifizierung und Rechenzentren gemeinsam.",
+        "description": (
+            "Kälte, veränderte Strahlung, Elektrifizierung und Rechenzentren "
+            "gemeinsam."
+        ),
     },
 }
 
@@ -94,7 +131,7 @@ SERIES_COLORS = {
     "HGB-Prognose": "#078C8C",
     "Kalender-Baseline": "#D97706",
     "Referenzprofil": "#486581",
-    "Nur Temperaturänderung": "#4C78A8",
+    "ML-Wetterszenario": "#4C78A8",
     "Gesamtszenario": "#D1495B",
 }
 
@@ -646,8 +683,9 @@ def render_overview() -> None:
             st.markdown(
                 """
                 **Die transparente Was-wäre-wenn-Rechnung.** Historische
-                Wetterprofile werden mit expliziten Temperatur-, Nachfrage-
-                und Rechenzentrumsannahmen kombiniert.
+                Wetterprofile werden über Temperatur sowie direkte und
+                diffuse Strahlung verändert und mit transparenten
+                Strukturannahmen kombiniert.
                 """
             )
             st.caption("Szenarien sind Stressannahmen, keine Zukunftsprognosen.")
@@ -896,6 +934,14 @@ def initialize_scenario_state() -> None:
         preset["temperature_delta"],
     )
     st.session_state.setdefault(
+        "scenario_direct_radiation_pct",
+        preset["direct_radiation_pct"],
+    )
+    st.session_state.setdefault(
+        "scenario_diffuse_radiation_pct",
+        preset["diffuse_radiation_pct"],
+    )
+    st.session_state.setdefault(
         "scenario_demand_change",
         preset["demand_change"],
     )
@@ -910,6 +956,12 @@ def apply_scenario_preset(name: str) -> None:
     preset = SCENARIO_PRESETS[name]
     st.session_state["scenario_temperature_delta"] = preset[
         "temperature_delta"
+    ]
+    st.session_state["scenario_direct_radiation_pct"] = preset[
+        "direct_radiation_pct"
+    ]
+    st.session_state["scenario_diffuse_radiation_pct"] = preset[
+        "diffuse_radiation_pct"
     ]
     st.session_state["scenario_demand_change"] = preset["demand_change"]
     st.session_state["scenario_data_centre_mw"] = preset["data_centre_mw"]
@@ -928,7 +980,7 @@ def build_scenario_chart(scenario: pd.DataFrame) -> alt.Chart:
         .rename(
             columns={
                 "base_prediction_mw": "Referenzprofil",
-                "weather_prediction_mw": "Nur Temperaturänderung",
+                "weather_prediction_mw": "ML-Wetterszenario",
                 "scenario_prediction_mw": "Gesamtszenario",
             }
         )
@@ -940,7 +992,7 @@ def build_scenario_chart(scenario: pd.DataFrame) -> alt.Chart:
     )
     order = [
         "Referenzprofil",
-        "Nur Temperaturänderung",
+        "ML-Wetterszenario",
         "Gesamtszenario",
     ]
     return (
@@ -990,6 +1042,150 @@ def build_scenario_chart(scenario: pd.DataFrame) -> alt.Chart:
     )
 
 
+def build_temperature_input_chart(scenario: pd.DataFrame) -> alt.Chart:
+    """Vergleicht typisches und gewähltes Temperaturprofil."""
+
+    chart_data = (
+        scenario[
+            [
+                "local_hour",
+                "typical_temperature_c",
+                "scenario_temperature_c",
+            ]
+        ]
+        .rename(
+            columns={
+                "typical_temperature_c": "Typisches Profil",
+                "scenario_temperature_c": "Gewähltes Wetter",
+            }
+        )
+        .melt(
+            id_vars="local_hour",
+            var_name="Profil",
+            value_name="Temperatur_C",
+        )
+    )
+    order = ["Typisches Profil", "Gewähltes Wetter"]
+    return (
+        alt.Chart(chart_data)
+        .mark_line(point=alt.OverlayMarkDef(size=35), strokeWidth=2.5)
+        .encode(
+            x=alt.X(
+                "local_hour:Q",
+                title="Lokale Stunde",
+                scale=alt.Scale(domain=[0, 23]),
+                axis=alt.Axis(values=list(range(0, 24, 3))),
+            ),
+            y=alt.Y(
+                "Temperatur_C:Q",
+                title="Temperatur (°C)",
+                scale=alt.Scale(zero=False),
+            ),
+            color=alt.Color(
+                "Profil:N",
+                title=None,
+                scale=alt.Scale(
+                    domain=order,
+                    range=["#486581", "#D1495B"],
+                ),
+                sort=order,
+                legend=alt.Legend(orient="top", direction="horizontal"),
+            ),
+            strokeDash=alt.StrokeDash(
+                "Profil:N",
+                title=None,
+                scale=alt.Scale(domain=order, range=[[7, 4], [1, 0]]),
+                sort=order,
+                legend=None,
+            ),
+            tooltip=[
+                alt.Tooltip("local_hour:Q", title="Lokale Stunde"),
+                alt.Tooltip("Profil:N", title="Profil"),
+                alt.Tooltip(
+                    "Temperatur_C:Q",
+                    title="Temperatur (°C)",
+                    format=".1f",
+                ),
+            ],
+        )
+        .properties(height=320, title="Temperaturprofil")
+    )
+
+
+def build_radiation_input_chart(scenario: pd.DataFrame) -> alt.Chart:
+    """Vergleicht direkte und diffuse Strahlung vor der ML-Inferenz."""
+
+    parts = []
+    for radiation_type, typical_column, scenario_column in [
+        (
+            "Direkte Strahlung",
+            "typical_direct_radiation_wm2",
+            "scenario_direct_radiation_wm2",
+        ),
+        (
+            "Diffuse Strahlung",
+            "typical_diffuse_radiation_wm2",
+            "scenario_diffuse_radiation_wm2",
+        ),
+    ]:
+        for profile, column in [
+            ("Typisches Profil", typical_column),
+            ("Gewähltes Wetter", scenario_column),
+        ]:
+            part = scenario[["local_hour", column]].copy()
+            part.rename(columns={column: "Strahlung_Wm2"}, inplace=True)
+            part["Strahlungsart"] = radiation_type
+            part["Profil"] = profile
+            parts.append(part)
+    chart_data = pd.concat(parts, ignore_index=True)
+
+    return (
+        alt.Chart(chart_data)
+        .mark_line(point=alt.OverlayMarkDef(size=30), strokeWidth=2.4)
+        .encode(
+            x=alt.X(
+                "local_hour:Q",
+                title="Lokale Stunde",
+                scale=alt.Scale(domain=[0, 23]),
+                axis=alt.Axis(values=list(range(0, 24, 3))),
+            ),
+            y=alt.Y(
+                "Strahlung_Wm2:Q",
+                title="Strahlung (W/m²)",
+            ),
+            color=alt.Color(
+                "Strahlungsart:N",
+                title=None,
+                scale=alt.Scale(
+                    domain=["Direkte Strahlung", "Diffuse Strahlung"],
+                    range=["#D97706", "#078C8C"],
+                ),
+                legend=alt.Legend(orient="top", direction="horizontal"),
+            ),
+            strokeDash=alt.StrokeDash(
+                "Profil:N",
+                title=None,
+                scale=alt.Scale(
+                    domain=["Typisches Profil", "Gewähltes Wetter"],
+                    range=[[7, 4], [1, 0]],
+                ),
+                legend=alt.Legend(orient="top", direction="horizontal"),
+            ),
+            tooltip=[
+                alt.Tooltip("local_hour:Q", title="Lokale Stunde"),
+                alt.Tooltip("Strahlungsart:N", title="Strahlungsart"),
+                alt.Tooltip("Profil:N", title="Profil"),
+                alt.Tooltip(
+                    "Strahlung_Wm2:Q",
+                    title="Strahlung (W/m²)",
+                    format=",.1f",
+                ),
+            ],
+        )
+        .properties(height=320, title="Strahlungsprofile")
+    )
+
+
 def render_scenario() -> None:
     render_page_header(
         "K · Knowledge Transfer",
@@ -1004,27 +1200,37 @@ def render_scenario() -> None:
         "Ein Preset setzt nachvollziehbare Startwerte. Anschließend können "
         "alle Annahmen manuell feinjustiert werden."
     )
-    preset_columns = st.columns(len(SCENARIO_PRESETS))
-    for index, (name, preset) in enumerate(SCENARIO_PRESETS.items()):
-        with preset_columns[index]:
-            st.button(
-                f"{preset['icon']} {name}",
-                key=f"scenario_preset_{index}",
-                type=(
-                    "primary"
-                    if st.session_state["scenario_preset"] == name
-                    else "secondary"
-                ),
-                width="stretch",
-                on_click=apply_scenario_preset,
-                args=(name,),
-            )
+    preset_items = list(SCENARIO_PRESETS.items())
+    for row_start in range(0, len(preset_items), 4):
+        preset_columns = st.columns(4)
+        for column, (index, (name, preset)) in zip(
+            preset_columns,
+            enumerate(preset_items[row_start : row_start + 4], row_start),
+        ):
+            with column:
+                st.button(
+                    f"{preset['icon']} {name}",
+                    key=f"scenario_preset_{index}",
+                    type=(
+                        "primary"
+                        if st.session_state["scenario_preset"] == name
+                        else "secondary"
+                    ),
+                    width="stretch",
+                    on_click=apply_scenario_preset,
+                    args=(name,),
+                )
     active_preset = SCENARIO_PRESETS[st.session_state["scenario_preset"]]
     st.info(active_preset["description"], icon="💡")
 
     with st.container(border=True):
-        identity_col, temp_col, demand_col, data_col = st.columns(
-            [1.05, 1, 1, 1]
+        st.markdown("#### 1 · Direkte ML-Eingaben")
+        st.caption(
+            "Land, Datum und Wetter verändern die Feature-Matrix und lösen "
+            "eine neue HGB-Inferenz aus."
+        )
+        identity_col, temp_col, direct_col, diffuse_col = st.columns(
+            [1.1, 1, 1, 1]
         )
         with identity_col:
             country = st.radio(
@@ -1050,6 +1256,40 @@ def render_scenario() -> None:
                 key="scenario_temperature_delta",
                 help="Abweichung vom historischen Medianprofil des Monats.",
             )
+        with direct_col:
+            direct_radiation_pct = st.slider(
+                "Direkte Sonneneinstrahlung",
+                min_value=0,
+                max_value=200,
+                step=5,
+                key="scenario_direct_radiation_pct",
+                format="%d %%",
+                help=(
+                    "Anteil des typischen direkten Strahlungsprofils. "
+                    "100 % entspricht dem historischen Monatsmedian."
+                ),
+            )
+        with diffuse_col:
+            diffuse_radiation_pct = st.slider(
+                "Diffuse Sonneneinstrahlung",
+                min_value=0,
+                max_value=200,
+                step=5,
+                key="scenario_diffuse_radiation_pct",
+                format="%d %%",
+                help=(
+                    "Anteil des typischen diffusen Strahlungsprofils. "
+                    "100 % entspricht dem historischen Monatsmedian."
+                ),
+            )
+
+    with st.container(border=True):
+        st.markdown("#### 2 · Explizite Strukturannahmen")
+        st.caption(
+            "Diese Annahmen sind nicht vom Modell gelernt, sondern werden "
+            "nach der ML-Inferenz transparent angewendet."
+        )
+        demand_col, data_col = st.columns(2)
         with demand_col:
             demand_change_pct = st.slider(
                 "Nachfrageänderung (%)",
@@ -1068,11 +1308,26 @@ def render_scenario() -> None:
                 key="scenario_data_centre_mw",
                 help="Zusätzliche konstante Last in jeder Szenariostunde.",
             )
+
+    with st.container(border=True):
+        st.markdown("#### 3 · Auswertung")
+        st.caption(
+            "Die Schwelle verändert nicht die Lastkurve, sondern nur die "
+            "Einordnung des berechneten Szenarios."
+        )
+        quantile_col, explanation_col = st.columns([1, 2])
+        with quantile_col:
             quantile = st.select_slider(
                 "Extremzustandsschwelle",
                 options=[0.95, 0.99],
                 value=0.99,
                 format_func=lambda value: f"{int(100 * value)}-%-Quantil",
+            )
+        with explanation_col:
+            st.markdown(
+                "Verglichen wird mit einer historischen nationalen "
+                "Lastschwelle aus 2015–2017. Die Unsicherheit stammt aus "
+                "vollständigen Residualtagen der Validierung 2018."
             )
 
     model = load_model()
@@ -1083,6 +1338,8 @@ def render_scenario() -> None:
         country=country,
         target_date=target_date,
         temperature_delta_c=temperature_delta,
+        direct_radiation_factor=direct_radiation_pct / 100.0,
+        diffuse_radiation_factor=diffuse_radiation_pct / 100.0,
         demand_change_fraction=demand_change_pct / 100.0,
         additional_data_centre_load_mw=data_centre_mw,
     )
@@ -1150,9 +1407,10 @@ def render_scenario() -> None:
         delta_color="off",
     )
 
-    profile_tab, values_tab, logic_tab = st.tabs(
+    profile_tab, weather_tab, values_tab, logic_tab = st.tabs(
         [
             "📈 Lastprofil",
+            "🌤 Wetterinputs",
             "🔢 Zukunftswerte",
             "🧭 Einordnung",
         ]
@@ -1162,6 +1420,22 @@ def render_scenario() -> None:
             build_scenario_chart(scenario),
             use_container_width=True,
         )
+    with weather_tab:
+        st.caption(
+            "Gestrichelt: historisches Medianprofil 1980–2019. Durchgezogen: "
+            "die tatsächlich an das HGB übergebenen Wettermerkmale."
+        )
+        temperature_chart, radiation_chart = st.columns(2, gap="large")
+        with temperature_chart:
+            st.altair_chart(
+                build_temperature_input_chart(scenario),
+                use_container_width=True,
+            )
+        with radiation_chart:
+            st.altair_chart(
+                build_radiation_input_chart(scenario),
+                use_container_width=True,
+            )
     with values_tab:
         table = scenario[
             [
@@ -1207,8 +1481,10 @@ def render_scenario() -> None:
 
                 1. Kalendermerkmale folgen dem gewählten Datum.
                 2. Wetter ist der historische Median nach Land, Monat und Stunde.
-                3. Die Temperaturabweichung wird vor der ML-Inferenz angewendet.
-                4. Nachfrage und Rechenzentrumslast werden danach transparent addiert.
+                3. Temperatur sowie direkte und diffuse Strahlung werden vor
+                   der ML-Inferenz verändert.
+                4. Nachfrage und Rechenzentrumslast werden danach transparent
+                   angewendet.
                 """
             )
         with warning_col:
