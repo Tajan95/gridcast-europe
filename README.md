@@ -23,7 +23,10 @@ Die Streamlit-Erweiterung untersucht zusätzlich, wie sich ein historisch
 abgeleitetes Lastprofil unter veränderten Temperatur- und Strahlungsprofilen
 sowie expliziten Nachfrage- und Rechenzentrumsannahmen verändert. Ein
 gekoppelter Zukunftspfad interpoliert dafür transparente europäische
-Stressannahmen von 2020 bis 2050; alle Einzelwerte bleiben editierbar.
+Stressannahmen von 2020 bis 2050; alle Einzelwerte bleiben editierbar. Dabei
+ist nur die Nachfragegröße unmittelbar an einen publizierten 2050-Szenariowert
+angelehnt. Temperatur, Rechenzentrumslast und Strahlung sind offen
+dokumentierte Modellierungsannahmen auf Basis europäischer Quellenbefunde.
 
 ## 📊 Kernergebnisse
 

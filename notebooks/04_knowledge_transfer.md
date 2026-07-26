@@ -103,10 +103,23 @@ Wetter- und Strukturregler. Der linear interpolierte Endpunkt 2050 setzt
 \(+2.000\,\mathrm{MW}\) Rechenzentrumslast und jeweils \(102\,\%\) der
 typischen direkten und diffusen Strahlung. Das Szenariodatum bleibt getrennt,
 damit Kalender- und Wochentagseffekte den Pfadvergleich nicht verfälschen.
-Die europaweit einheitlichen Werte sind an EEA, ENTSO-E/ENTSOG TYNDP 2024,
-IEA *Energy and AI* sowie Segado-Moreno et al. (2026,
-DOI `10.1016/j.rse.2025.115122`) angelehnt. Sie sind transparente
-Stressannahmen und keine länderscharfe Prognose.
+Quellenbefund und Modellierungsentscheidung sind bewusst getrennt:
+
+- Die \(+35\,\%\) Nachfrage sind direkt am TYNDP-2024-Szenario
+  *Global Ambition* orientiert.
+- Die \(+1{,}5\,^\circ\mathrm{C}\) sind eine aus dem europäischen
+  Erwärmungstrend der EEA abgeleitete Stressannahme, keine länderscharfe
+  Temperaturprognose.
+- Die \(+2.000\,\mathrm{MW}\) je ausgewähltem Land übersetzen den von der IEA
+  projizierten europäischen Rechenzentrumsanstieg illustrativ in einen
+  konstanten Lastaufschlag; dieser Wert steht so nicht in der Quelle.
+- Die \(102\,\%\) übertragen den schwachen europäischen Brightening-Trend aus
+  Segado-Moreno et al. (2026, DOI `10.1016/j.rse.2025.115122`) konservativ auf
+  die Regler. Die identische Skalierung direkter und diffuser Strahlung ist
+  eine eigene Vereinfachung, weil die Studie keine robuste Aufteilung vorgibt.
+
+Der Pfad ist damit eine transparente Was-wäre-wenn-Annahme und keine
+länderscharfe Prognose.
 
 ## Wahrscheinlichkeit eines extremen Lastzustands
 
@@ -154,11 +167,26 @@ erhalten. Deshalb werden vollständige 24-Stunden-Residualpfade
 \right]
 ```
 
-| Land | Residualtage 2018 | Q95-Schwelle | Brier-Score 2019 |
-|---|---:|---:|---:|
-| DE | 362 | 70.597 MW | 0,0657 |
-| FR | 359 | 75.338 MW | 0,0146 |
-| PL | 362 | 23.623 MW | 0,0475 |
+**Nachgelagerte Q95-Prüfung auf 2019**
+
+| Land | Residualtage 2018 | Schwelle | Ereignisquote | mittlere Prognose | Brier-Score |
+|---|---:|---:|---:|---:|---:|
+| DE | 362 | 70.597 MW | 21,27 % | 31,02 % | 0,0657 |
+| FR | 359 | 75.338 MW | 12,74 % | 12,43 % | 0,0146 |
+| PL | 362 | 23.623 MW | 27,35 % | 30,76 % | 0,0475 |
+
+**Nachgelagerte Q99-Prüfung auf 2019**
+
+| Land | Residualtage 2018 | Schwelle | Ereignisquote | mittlere Prognose | Brier-Score |
+|---|---:|---:|---:|---:|---:|
+| DE | 362 | 73.365 MW | 8,56 % | 13,32 % | 0,0515 |
+| FR | 359 | 82.762 MW | 2,77 % | 3,30 % | 0,0087 |
+| PL | 362 | 24.732 MW | 11,05 % | 14,55 % | 0,0266 |
+
+Die Q95- und Q99-Brier-Scores werden wegen unterschiedlicher Ereignisraten
+nicht als direkter Modellwettbewerb interpretiert. Die Q99-Auswertung belegt
+jedoch, dass auch der konservativere App-Standard explizit gegen 2019 geprüft
+wurde.
 
 Der Indikator bleibt explorativ: nationale Quantile sind keine technischen
 Netzgrenzen, das 99-%-Quantil enthält wenige Ereignisse und starke
@@ -193,7 +221,7 @@ Bestanden sind:
 - exakte Reproduktion des C-Makro-nMAE,
 - frisches Laden des finalen Modells,
 - gültige 24-Stunden-Szenarioinferenz,
-- zwölf Modell-, Szenario-, Risiko- und App-Strukturtests,
+- 34 von 34 Modell-, Szenario-, Risiko- und App-Strukturtests,
 - lokaler Streamlit-Serverstart mit erfolgreichem Health-Check,
 - fehlerfreie Ausführung aller vier App-Ansichten,
 - Wetter-Preset-Interaktion mit neuer HGB-Inferenz und Neuberechnung aller
@@ -210,7 +238,7 @@ streamlit run streamlit_app/app.py
 Das Community-Cloud-Deployment ist unter
 [gridcast-europe.streamlit.app](https://gridcast-europe.streamlit.app/)
 stabil aktiv. Die Laufzeit wurde ausdrücklich auf Python 3.12.13 festgelegt;
-gleichzeitig wurde die Cloud-`requirements.txt` auf sieben direkte
+gleichzeitig wurde die Cloud-`requirements.txt` auf acht direkte
 App-Abhängigkeiten reduziert. Dadurch sank die aufgelöste Umgebung von 129 auf
 41 Pakete und die App startet ohne den zuvor unter Python 3.14.6 beobachteten
 nativen Prozessabsturz. Notebook- und Entwicklungswerkzeuge bleiben getrennt

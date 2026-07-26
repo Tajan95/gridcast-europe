@@ -16,8 +16,10 @@ FUTURE_PATH_BASE_YEAR = 2020
 FUTURE_PATH_END_YEAR = 2050
 
 # Transparente, europaweit einheitliche Endpunkte für einen vergleichbaren
-# Szenariopfad in DE, FR und PL. Die fachliche Herleitung wird im App-Tooltip
-# offengelegt; es handelt sich ausdrücklich nicht um länderscharfe Prognosen.
+# Szenariopfad in DE, FR und PL. Nur die Nachfragegröße ist direkt an einen
+# publizierten 2050-Szenariowert angelehnt. Temperatur, Rechenzentrumslast und
+# Strahlung sind bewusst gewählte Übersetzungen europäischer Quellenbefunde in
+# illustrative Reglerwerte; es handelt sich nicht um länderscharfe Prognosen.
 FUTURE_PATH_2050_TEMPERATURE_DELTA_C = 1.5
 FUTURE_PATH_2050_DEMAND_CHANGE_PCT = 35
 FUTURE_PATH_2050_DATA_CENTRE_MW = 2_000

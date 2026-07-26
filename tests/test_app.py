@@ -1,5 +1,6 @@
 from pathlib import Path
 import ast
+import json
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -9,6 +10,11 @@ def test_streamlit_app_and_deployment_assets_exist():
     app_path = PROJECT_ROOT / "streamlit_app" / "app.py"
     source = app_path.read_text(encoding="utf-8")
     readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    deployment_report = json.loads(
+        (PROJECT_ROOT / "reports" / "k_deployment.json").read_text(
+            encoding="utf-8"
+        )
+    )
     ast.parse(source)
     assert "Historischer Backtest" in source
     assert "Zukunftsszenario" in source
@@ -82,3 +88,8 @@ def test_streamlit_app_and_deployment_assets_exist():
         "reports/k_deployment.json",
     ]:
         assert (PROJECT_ROOT / relative_path).is_file()
+    for country in ["DE", "FR", "PL"]:
+        evaluation = deployment_report["risk_indicator"]["evaluation"][country]
+        assert "q95_test_2019" in evaluation
+        assert "q99_test_2019" in evaluation
+        assert evaluation["q99_test_2019"]["complete_test_days"] > 0
