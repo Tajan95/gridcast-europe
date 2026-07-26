@@ -90,7 +90,7 @@ Nachfrageänderung und zusätzliche Rechenzentrumslast werden danach als explizi
 
 Das Beispielszenario erhöht die modellierte Spitzenlast um 10,24 Prozent. Es ist keine konkrete Prognose für 2030.
 
-Die sieben Presets sind illustrative Einstiegspunkte. Ein eigener Wetterinputs-Tab stellt das typische und das tatsächlich an das HGB übergebene Temperatur- und Strahlungsprofil gegenüber. Zusätzlich zeigt die App Tagesenergie, Spitzenzeit und Stunden oberhalb der historischen Quantilschwelle; alle Annahmen bleiben manuell veränderbar.
+Die sieben Presets sind illustrative Einstiegspunkte. Zusätzlich koppelt ein quellenbasierter Annahmenpfad von 2020 bis 2050 Temperatur, Nachfrage, Rechenzentrumslast sowie direkte und diffuse Strahlung; alle Einzelwerte bleiben manuell veränderbar. Ein eigener Wetterinputs-Tab stellt das typische und das tatsächlich an das HGB übergebene Temperatur- und Strahlungsprofil gegenüber. Zusätzlich zeigt die App Tagesenergie, Spitzenzeit und Stunden oberhalb der historischen Quantilschwelle.
 
 Der Risikoindikator bezeichnet nur die Wahrscheinlichkeit einer historischen nationalen Quantilsüberschreitung, ausdrücklich nicht die Wahrscheinlichkeit eines Blackouts.
 

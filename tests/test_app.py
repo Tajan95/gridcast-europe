@@ -19,6 +19,11 @@ def test_streamlit_app_and_deployment_assets_exist():
     assert "Wetterinputs" in source
     assert "Direkte ML-Eingaben" in source
     assert "Explizite Strukturannahmen" in source
+    assert "Gekoppelter Zukunftspfad bis 2050" in source
+    assert 'key="scenario_future_path"' in source
+    assert "def apply_future_path()" in source
+    assert "FUTURE_PATH_HELP" in source
+    assert "doi.org/10.1016/j.rse.2025.115122" in source
     assert '"Q95",' in source
     assert '"Q99",' in source
     assert 'st.session_state.setdefault("scenario_quantile", 0.99)' in source

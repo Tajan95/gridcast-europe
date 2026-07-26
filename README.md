@@ -21,7 +21,9 @@ historischen Backtest mit einer klar getrennten Zukunftsszenarioanalyse.
 
 Die Streamlit-Erweiterung untersucht zusätzlich, wie sich ein historisch
 abgeleitetes Lastprofil unter veränderten Temperatur- und Strahlungsprofilen
-sowie expliziten Nachfrage- und Rechenzentrumsannahmen verändert.
+sowie expliziten Nachfrage- und Rechenzentrumsannahmen verändert. Ein
+gekoppelter Zukunftspfad interpoliert dafür transparente europäische
+Stressannahmen von 2020 bis 2050; alle Einzelwerte bleiben editierbar.
 
 ## 📊 Kernergebnisse
 
@@ -88,9 +90,10 @@ streamlit run streamlit_app/app.py
 
 Die App umfasst eine interaktive Europakarte, einen historischen Backtest mit
 Hoverwerten, sieben illustrative Szenario-Presets, ein Wetter-Cockpit mit drei
-direkten ML-Eingaben, klar getrennte Strukturannahmen, visualisierte
-Wetterprofile, Zukunftsvergleichswerte sowie Methodik und Grenzen. Für die
-Inferenz wird ausschließlich das verifizierte Modell
+direkten ML-Eingaben, einen quellenbasierten gekoppelten Zukunftspfad,
+klar getrennte Strukturannahmen, visualisierte Wetterprofile,
+Zukunftsvergleichswerte sowie Methodik und Grenzen. Für die Inferenz wird
+ausschließlich das verifizierte Modell
 [`models/gridcast_final_2015_2019.joblib`](models/gridcast_final_2015_2019.joblib)
 verwendet.
 
