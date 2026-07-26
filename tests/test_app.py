@@ -26,7 +26,10 @@ def test_streamlit_app_and_deployment_assets_exist():
     assert '"Stundendaten und exakte Fehlerwerte", expanded=True' in source
     assert "EXPECTED_SCENARIO_API_VERSION = 2" in source
     assert "padding-top: 4.5rem" in source
+    assert "max-width: 1320px" in source
     assert "max-width: 1680px" in source
+    assert "def apply_scenario_page_width()" in source
+    assert "apply_scenario_page_width()" in source
     assert 'st.columns([0.95, 1.55], gap="large")' in source
     assert 'control_col.container(key="scenario_controls")' in source
     assert 'result_col.container(key="scenario_results")' in source
@@ -39,6 +42,12 @@ def test_streamlit_app_and_deployment_assets_exist():
     assert "result_panel.columns(4" in source
     assert ".st-key-scenario_controls" in source
     assert ".st-key-scenario_results" in source
+    assert "[data-testid=\"stMarkdownContainer\"]:has(h4)" in source
+    assert 'key="scenario_structure_inputs",' in source
+    assert 'key="scenario_evaluation",' in source
+    assert source.count('height="stretch",') >= 2
+    assert 'orient="bottom"' in source
+    assert "columns=2" in source
     assert "format_power_mw" in source
     assert "format_energy_mwh" in source
     assert "Technischer Deployment- und Reproduzierbarkeitsstatus" in source
