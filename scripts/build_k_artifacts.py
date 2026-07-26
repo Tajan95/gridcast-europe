@@ -264,6 +264,11 @@ def main() -> None:
                 paths,
                 threshold_q95,
             ),
+            "q99_test_2019": evaluate_daily_risk(
+                country_backtest,
+                paths,
+                threshold_q99,
+            ),
         }
     np.savez_compressed(RISK_PATH, **risk_arrays)
 
@@ -346,7 +351,7 @@ def main() -> None:
                 "24 Szenariostunden vorhergesagt",
                 "keine nicht-endlichen Prognosen",
                 "Risiko-Residualpfade länderweise vollständig",
-                "12 Modell-, Szenario-, Risiko- und App-Strukturtests bestanden",
+                "automatisierte Modell-, Szenario-, Risiko- und App-Strukturtests bestanden",
                 "alle vier Streamlit-Ansichten ohne Ausnahme ausgeführt",
                 "Wetter-Preset aktualisiert Temperatur und Strahlungsprofile",
                 "Streamlit 1.50.0 unter Python 3.12 gestartet",

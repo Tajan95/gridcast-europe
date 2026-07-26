@@ -42,6 +42,8 @@ Die Kalender-Baseline erreicht 5,76 Prozent. Ridge kommt auf 4,98 Prozent. Das b
 
 Die Gewinnerkonfiguration wurde danach eingefroren. 2019 spielte bei dieser Entscheidung keine Rolle.
 
+Technisch enthält die gemeinsame Datei alle Jahre. Für A³ wurde 2019 unmittelbar nach dem Einlesen ausgeschlossen und weder vorhergesagt, ausgewertet noch zum Tuning verwendet.
+
 Quelle: notebooks/02_a3_model_development.ipynb und reports/a3/a3_selection.json.
 
 ## Folie 5
@@ -92,6 +94,8 @@ Das Beispielszenario erhöht die modellierte Spitzenlast um 10,24 Prozent. Es is
 
 Die sieben Presets sind illustrative Einstiegspunkte. Zusätzlich koppelt ein quellenbasierter Annahmenpfad von 2020 bis 2050 Temperatur, Nachfrage, Rechenzentrumslast sowie direkte und diffuse Strahlung; alle Einzelwerte bleiben manuell veränderbar. Ein eigener Wetterinputs-Tab stellt das typische und das tatsächlich an das HGB übergebene Temperatur- und Strahlungsprofil gegenüber. Zusätzlich zeigt die App Tagesenergie, Spitzenzeit und Stunden oberhalb der historischen Quantilschwelle.
 
+Nur die Nachfragegröße ist direkt an einen publizierten 2050-Szenariowert angelehnt. Temperatur, Rechenzentrumslast und die identische Strahlungsskalierung sind transparente Modellierungsannahmen auf Basis europäischer Quellenbefunde, keine länderscharfen Prognosen.
+
 Der Risikoindikator bezeichnet nur die Wahrscheinlichkeit einer historischen nationalen Quantilsüberschreitung, ausdrücklich nicht die Wahrscheinlichkeit eines Blackouts.
 
 Quelle: src/gridcast/scenario.py, src/gridcast/risk.py und reports/k_deployment.json.
@@ -102,7 +106,7 @@ Zeit: ca. 60 Sekunden.
 
 Das finale Joblib-Artefakt ist rund 1,9 Megabyte groß, hat eine feste Prüfsumme und liegt im Repository.
 
-Zwölf Funktionstests bestehen. Zusätzlich laufen alle vier App-Ansichten und die Wetter-Preset-Neuberechnung ohne Ausnahme.
+34 von 34 Funktionstests bestehen. Zusätzlich laufen alle vier App-Ansichten und die Wetter-Preset-Neuberechnung ohne Ausnahme.
 
 Das Community-Cloud-Deployment läuft stabil unter Python 3.12.13. Durch die Trennung von App- und Entwicklungsabhängigkeiten sank die Cloud-Umgebung von 129 auf 41 Pakete; der frühere native Absturz unter Python 3.14.6 tritt damit nicht mehr auf.
 
