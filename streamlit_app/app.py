@@ -893,7 +893,11 @@ def render_overview() -> None:
     st.markdown("## Zwei strikt getrennte Analysewege")
     backtest_col, scenario_col = st.columns(2, gap="large")
     with backtest_col:
-        with st.container(border=True):
+        with st.container(
+            border=True,
+            key="overview_backtest_path",
+            height="stretch",
+        ):
             st.markdown("### 🧪 Historischer Backtest")
             st.markdown(
                 """
@@ -904,7 +908,11 @@ def render_overview() -> None:
             )
             st.caption("Istwert · HGB-Prognose · Kalender-Baseline")
     with scenario_col:
-        with st.container(border=True):
+        with st.container(
+            border=True,
+            key="overview_scenario_path",
+            height="stretch",
+        ):
             st.markdown("### 🔭 Konditionales Zukunftsszenario")
             st.markdown(
                 """
