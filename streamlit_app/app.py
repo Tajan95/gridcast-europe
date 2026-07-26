@@ -1922,9 +1922,15 @@ def render_methodology() -> None:
         ("K", "Transfer", "Modell, App und Prüfungsartefakte"),
     ]
     phase_columns = st.columns(5)
-    for column, (letter, name, description) in zip(phase_columns, phases):
+    for index, (column, (letter, name, description)) in enumerate(
+        zip(phase_columns, phases)
+    ):
         with column:
-            with st.container(border=True):
+            with st.container(
+                border=True,
+                key=f"methodology_phase_{index}",
+                height="stretch",
+            ):
                 st.markdown(f"### {letter}")
                 st.markdown(f"**{name}**")
                 st.caption(description)

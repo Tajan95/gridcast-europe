@@ -54,7 +54,8 @@ def test_streamlit_app_and_deployment_assets_exist():
     assert 'key="scenario_evaluation",' in source
     assert 'key="overview_backtest_path",' in source
     assert 'key="overview_scenario_path",' in source
-    assert source.count('height="stretch",') >= 4
+    assert 'key=f"methodology_phase_{index}",' in source
+    assert source.count('height="stretch",') >= 5
     assert 'orient="bottom"' in source
     assert "columns=2" in source
     assert source.count('format="DD.MM.YYYY"') == 2
