@@ -26,6 +26,11 @@ def test_streamlit_app_and_deployment_assets_exist():
     assert '"Stundendaten und exakte Fehlerwerte", expanded=True' in source
     assert "EXPECTED_SCENARIO_API_VERSION = 2" in source
     assert "padding-top: 4.5rem" in source
+    assert 'st.columns([0.82, 1.68], gap="large")' in source
+    assert 'result_col.container(key="scenario_results")' in source
+    assert ".st-key-scenario_results" in source
+    assert "format_power_mw" in source
+    assert "format_energy_mwh" in source
     assert "Technischer Deployment- und Reproduzierbarkeitsstatus" in source
     for heading in [
         "# ⚡ GridCast Europe",

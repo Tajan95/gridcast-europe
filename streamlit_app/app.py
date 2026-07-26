@@ -19,6 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from gridcast.config import COUNTRY_REGISTRY
+from gridcast.formatting import format_energy_mwh, format_power_mw
 from gridcast.risk import (
     empirical_extreme_probabilities,
     extreme_day_probability,
@@ -299,6 +300,12 @@ def apply_visual_theme() -> None:
             line-height: 1.55;
         }
 
+        .st-key-scenario_results {
+            position: sticky;
+            top: 4.75rem;
+            z-index: 2;
+        }
+
         h1, h2, h3 {
             color: var(--gc-ink);
             letter-spacing: -0.02em;
@@ -311,6 +318,10 @@ def apply_visual_theme() -> None:
         @media (max-width: 850px) {
             .gc-hero {
                 padding: 1.6rem 1.4rem;
+            }
+
+            .st-key-scenario_results {
+                position: static;
             }
         }
         </style>
@@ -406,10 +417,6 @@ def build_country_overview() -> pd.DataFrame:
 
 def format_mw(value: float) -> str:
     return f"{value:,.0f} MW".replace(",", ".")
-
-
-def format_mwh(value: float) -> str:
-    return f"{value:,.0f} MWh".replace(",", ".")
 
 
 def format_pct(value: float, digits: int = 1) -> str:
@@ -1222,44 +1229,46 @@ def render_scenario() -> None:
     )
     initialize_scenario_state()
 
-    st.markdown("### Vordefinierte Stressannahmen")
-    st.caption(
-        "Ein Preset setzt nachvollziehbare Startwerte. Anschließend können "
-        "alle Annahmen manuell feinjustiert werden."
-    )
-    preset_items = list(SCENARIO_PRESETS.items())
-    for row_start in range(0, len(preset_items), 4):
-        preset_columns = st.columns(4)
-        for column, (index, (name, preset)) in zip(
-            preset_columns,
-            enumerate(preset_items[row_start : row_start + 4], row_start),
-        ):
-            with column:
-                st.button(
-                    f"{preset['icon']} {name}",
-                    key=f"scenario_preset_{index}",
-                    type=(
-                        "primary"
-                        if st.session_state["scenario_preset"] == name
-                        else "secondary"
-                    ),
-                    width="stretch",
-                    on_click=apply_scenario_preset,
-                    args=(name,),
-                )
-    active_preset = SCENARIO_PRESETS[st.session_state["scenario_preset"]]
-    st.info(active_preset["description"], icon="💡")
+    workspace = st.container(key="scenario_workspace")
+    with workspace:
+        control_col, result_col = st.columns([0.82, 1.68], gap="large")
+    result_panel = result_col.container(key="scenario_results")
 
-    with st.container(border=True):
-        st.markdown("#### 1 · Direkte ML-Eingaben")
+    with control_col:
+        st.markdown("### Szenario konfigurieren")
+        st.markdown("#### Vordefinierte Stressannahmen")
         st.caption(
-            "Land, Datum und Wetter verändern die Feature-Matrix und lösen "
-            "eine neue HGB-Inferenz aus."
+            "Preset wählen und die Annahmen anschließend manuell feinjustieren."
         )
-        identity_col, temp_col, direct_col, diffuse_col = st.columns(
-            [1.1, 1, 1, 1]
-        )
-        with identity_col:
+        preset_items = list(SCENARIO_PRESETS.items())
+        for row_start in range(0, len(preset_items), 2):
+            preset_columns = st.columns(2, gap="small")
+            for column, (index, (name, preset)) in zip(
+                preset_columns,
+                enumerate(preset_items[row_start : row_start + 2], row_start),
+            ):
+                with column:
+                    st.button(
+                        f"{preset['icon']} {name}",
+                        key=f"scenario_preset_{index}",
+                        type=(
+                            "primary"
+                            if st.session_state["scenario_preset"] == name
+                            else "secondary"
+                        ),
+                        width="stretch",
+                        on_click=apply_scenario_preset,
+                        args=(name,),
+                    )
+        active_preset = SCENARIO_PRESETS[st.session_state["scenario_preset"]]
+        st.info(active_preset["description"], icon="💡")
+
+        with st.container(border=True):
+            st.markdown("#### 1 · Direkte ML-Eingaben")
+            st.caption(
+                "Land, Datum und Wetter bauen die Feature-Matrix neu auf und "
+                "lösen eine HGB-Inferenz aus."
+            )
             country = st.radio(
                 "Land",
                 options=list(COUNTRY_REGISTRY),
@@ -1274,7 +1283,6 @@ def render_scenario() -> None:
                 max_value=date(2050, 12, 31),
                 key="scenario_date",
             )
-        with temp_col:
             temperature_delta = st.slider(
                 "Temperaturabweichung (°C)",
                 min_value=-5.0,
@@ -1283,7 +1291,6 @@ def render_scenario() -> None:
                 key="scenario_temperature_delta",
                 help="Abweichung vom historischen Medianprofil des Monats.",
             )
-        with direct_col:
             direct_radiation_pct = st.slider(
                 "Direkte Sonneneinstrahlung",
                 min_value=0,
@@ -1296,7 +1303,6 @@ def render_scenario() -> None:
                     "100 % entspricht dem historischen Monatsmedian."
                 ),
             )
-        with diffuse_col:
             diffuse_radiation_pct = st.slider(
                 "Diffuse Sonneneinstrahlung",
                 min_value=0,
@@ -1310,14 +1316,12 @@ def render_scenario() -> None:
                 ),
             )
 
-    with st.container(border=True):
-        st.markdown("#### 2 · Explizite Strukturannahmen")
-        st.caption(
-            "Diese Annahmen sind nicht vom Modell gelernt, sondern werden "
-            "nach der ML-Inferenz transparent angewendet."
-        )
-        demand_col, data_col = st.columns(2)
-        with demand_col:
+        with st.container(border=True):
+            st.markdown("#### 2 · Explizite Strukturannahmen")
+            st.caption(
+                "Nicht gelernt: Diese Werte werden nach der ML-Inferenz "
+                "transparent angewendet."
+            )
             demand_change_pct = st.slider(
                 "Nachfrageänderung (%)",
                 min_value=-20,
@@ -1326,7 +1330,6 @@ def render_scenario() -> None:
                 key="scenario_demand_change",
                 help="Transparenter Strukturaufschlag nach der ML-Inferenz.",
             )
-        with data_col:
             data_centre_mw = st.slider(
                 "Rechenzentrumslast (MW)",
                 min_value=0,
@@ -1336,14 +1339,11 @@ def render_scenario() -> None:
                 help="Zusätzliche konstante Last in jeder Szenariostunde.",
             )
 
-    with st.container(border=True):
-        st.markdown("#### 3 · Auswertung")
-        st.caption(
-            "Die Schwelle verändert nicht die Lastkurve, sondern nur die "
-            "Einordnung des berechneten Szenarios."
-        )
-        quantile_col, explanation_col = st.columns([1, 2])
-        with quantile_col:
+        with st.container(border=True):
+            st.markdown("#### 3 · Auswertung")
+            st.caption(
+                "Die Schwelle verändert nur die Einordnung, nicht die Lastkurve."
+            )
             st.markdown("**Extremzustandsschwelle**")
             q95_col, q99_col = st.columns(2, gap="small")
             quantile = float(st.session_state["scenario_quantile"])
@@ -1367,11 +1367,10 @@ def render_scenario() -> None:
                     args=(0.99,),
                     help="99-%-Quantil der historischen Last 2015–2017.",
                 )
-        with explanation_col:
-            st.markdown(
+            st.caption(
                 "Verglichen wird mit einer historischen nationalen "
-                "Lastschwelle aus 2015–2017. Die Unsicherheit stammt aus "
-                "vollständigen Residualtagen der Validierung 2018."
+                "Lastschwelle aus 2015–2017; die Unsicherheit stammt aus "
+                "Residualtagen der Validierung 2018."
             )
 
     model = load_model()
@@ -1427,18 +1426,22 @@ def render_scenario() -> None:
         (scenario["scenario_prediction_mw"] > threshold).sum()
     )
 
-    st.markdown("### Ergebnis gegenüber der historischen Referenz")
-    col1, col2, col3, col4 = st.columns(4)
+    result_panel.markdown("### Ergebnis gegenüber der historischen Referenz")
+    col1, col2 = result_panel.columns(2)
     col1.metric(
         "Szenario-Lastspitze",
-        format_mw(summary["scenario_peak_mw"]),
-        delta=format_mw(summary["peak_delta_mw"]),
+        format_power_mw(summary["scenario_peak_mw"]),
+        delta=format_power_mw(summary["peak_delta_mw"]),
     )
     col2.metric(
         "Szenario-Tagesenergie",
-        format_mwh(scenario_energy),
-        delta=f"{format_mwh(energy_delta)} · {format_pct(energy_delta_pct, 1)}",
+        format_energy_mwh(scenario_energy),
+        delta=(
+            f"{format_energy_mwh(energy_delta)} · "
+            f"{format_pct(energy_delta_pct, 1)}"
+        ),
     )
+    col3, col4 = result_panel.columns(2)
     col3.metric(
         "Zeitpunkt der Spitze",
         format_hour(scenario_peak_hour),
@@ -1452,7 +1455,7 @@ def render_scenario() -> None:
         delta_color="off",
     )
 
-    profile_tab, weather_tab, values_tab, logic_tab = st.tabs(
+    profile_tab, weather_tab, values_tab, logic_tab = result_panel.tabs(
         [
             "📈 Lastprofil",
             "🌤 Wetterinputs",
@@ -1540,14 +1543,14 @@ def render_scenario() -> None:
                 "Versorgungsausfallwahrscheinlichkeit."
             )
 
-    st.markdown(
+    result_panel.markdown(
         f"""
         **Schwellenreferenz:** {int(100 * quantile)}-%-Quantil der Last aus
         2015–2017 für {COUNTRY_REGISTRY[country].name} =
-        **{format_mw(threshold)}**. Die Unsicherheit basiert auf vollständigen
-        24-Stunden-Residualpfaden der Validierung 2018. Daraus ergibt sich für
-        dieses Szenario eine empirische Wahrscheinlichkeit von
-        **{format_pct(100 * day_probability, 1)}** für mindestens eine
+        **{format_power_mw(threshold)}**. Die Unsicherheit basiert auf
+        vollständigen 24-Stunden-Residualpfaden der Validierung 2018. Daraus
+        ergibt sich für dieses Szenario eine empirische Wahrscheinlichkeit
+        von **{format_pct(100 * day_probability, 1)}** für mindestens eine
         Extremstunde.
         """
     )
